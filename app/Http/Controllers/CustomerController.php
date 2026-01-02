@@ -19,7 +19,7 @@ class CustomerController extends Controller
     $customer = CustomerModel::findOrFail($id);
 
     $request->validate([
-        'status' => 'required|in:Active,Block'
+        'status' => 'required|in:active,block'
     ]);
 
     $customer->status = $request->status;

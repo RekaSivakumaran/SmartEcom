@@ -239,8 +239,8 @@ tr:hover {
 <div class="button-container">
     <h2>Customer Management</h2>
     <div>
-        <button class="action-btn" style="background:#6c757d;">Export CSV</button>
-        <button class="action-btn" style="background:#17a2b8;">Refresh Table</button>
+        <!-- <button class="action-btn" style="background:#6c757d;">Export CSV</button> -->
+        <button class="action-btn" style="background:#17a2b8;" onclick="refreshPage()">Refresh Table</button>
     </div>
 </div>
 
@@ -290,25 +290,26 @@ tr:hover {
 
         <!-- Form -->
         <form id="customerForm" method="POST">
+                 @csrf
              <input type="hidden" name="id" id="customer_id">
             <div class="form-group">
                 <label for="name">Name</label>
-                <input type="text" id="name" placeholder="Enter name" required>
+                <input type="text" id="name"  name="name" placeholder="Enter name" required>
             </div>
 
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" placeholder="Enter email" required>
+                <input type="email" id="email" name="email" placeholder="Enter email" required>
             </div>
 
             <div class="form-group">
                 <label for="mobile">Mobile Number</label>
-                <input type="tel" id="mobile" placeholder="Enter mobile number" required>
+                <input type="tel" id="mobile" name="mobile" placeholder="Enter mobile number" required>
             </div>
 
             <div class="form-group">
                 <label for="status">Status</label>
-                <select id="status" required>
+                <select id="status" name="status" required>
                     <option value="active">Active</option>
                     <option value="block">Block</option>
                 </select>
@@ -326,6 +327,9 @@ tr:hover {
 
 <script>
  
+ function refreshPage() {
+    location.reload();
+}
 
 function openModal(customerId) {
     const row = document.querySelector(`tr[data-id='${customerId}']`);
