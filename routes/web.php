@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CustomerController;
 
 
  
@@ -48,6 +49,11 @@ Route::get('/products', function () {
 Route::get('/users', [UserController::class, 'index'])->name('users.index');;
 Route::post('/users/store', [UserController::class, 'store'])->name('users.store');
 Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+Route::post('/customers/update-status/{id}', [CustomerController::class, 'updateStatus'])->name('customers.updateStatus');
+
+
 
 // Route::get('/dashboard', function () {
 //     return view('Admin.Dashboard');
