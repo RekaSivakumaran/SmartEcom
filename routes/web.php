@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\MainCategoryController;
-
+use App\Http\Controllers\BrandController;
  
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -58,6 +58,11 @@ Route::get('/category', [MainCategoryController::class, 'index'])->name('categor
 Route::post('/main-category/store', [MainCategoryController::class, 'store'])->name('maincategory.store');
 Route::post('/main-category/update/{id}', [MainCategoryController::class, 'update'])->name('maincategory.update');
 Route::delete('/main-category/delete/{id}', [MainCategoryController::class, 'destroy'])->name('maincategory.destroy');
+
+Route::get('/brands', [BrandController::class, 'index'])->name('brand.index');
+Route::post('/brand/store', [BrandController::class, 'store'])->name('brand.store');
+Route::post('/brand/update/{id}', [BrandController::class, 'update'])->name('brand.update');
+Route::delete('/brand/destroy/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
 
 
 

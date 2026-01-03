@@ -225,8 +225,8 @@
 </li>
 
    <li>
-    <a href="{{ route('brands') }}"
-       class="{{ request()->routeIs('brands') ? 'active' : '' }}">
+    <a href="{{ route('brand.index') }}"
+       class="{{ request()->routeIs('brand.index') ? 'active' : '' }}">
        Brand
     </a>
 </li>
