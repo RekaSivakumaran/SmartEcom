@@ -60,7 +60,7 @@ Route::post('/main-category/update/{id}', [MainCategoryController::class, 'updat
 Route::delete('/main-category/delete/{id}', [MainCategoryController::class, 'destroy'])->name('maincategory.destroy');
 
 Route::get('/brands', [BrandController::class, 'index'])->name('brand.index');
-Route::post('/brand/store', [BrandController::class, 'store'])->name('brand.store');
+Route::post('/brands', [BrandController::class, 'store'])->name('brands.store');
 Route::post('/brand/update/{id}', [BrandController::class, 'update'])->name('brand.update');
 Route::delete('/brand/destroy/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\BrandModel;
+use Illuminate\Validation\Rule;
 
 
 class BrandController extends Controller
@@ -20,7 +21,7 @@ class BrandController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'brandname' => 'required|string|max:255',
+            'brandname' => 'required|string|max:255|unique:brands,brandname',
             'status' => 'required|in:Active,Inactive',
         ]);
 
@@ -35,11 +36,15 @@ class BrandController extends Controller
     // Update existing brand
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'brandname' => 'required|string|max:255',
-            'status' => 'required|in:Active,Inactive',
-        ]);
-
+       $request->validate([
+        'brandname' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('brands', 'brandname')->ignore($id),
+        ],
+        'status' => 'required|in:Active,Inactive',
+    ]);
         $brand = BrandModel::findOrFail($id);
         $brand->update([
             'brandname' => $request->brandname,

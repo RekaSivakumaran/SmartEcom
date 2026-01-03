@@ -275,10 +275,9 @@
                 <td>{{ $brand->brandname }}</td>
                 <td>{{ $brand->status }}</td>
                 <td>
-                    <button class="action-btn view-btn" onclick="alert('Brand: {{ $brand->brandname }}\nStatus: {{ $brand->status }}')">View</button>
 
                     <button class="action-btn edit-btn" 
-                        onclick="openEditPopup({{ $brand->id }}, '{{ $brand->brandname }}', '{{ $brand->status }}')">
+                        onclick="openEditBrandPopup({{ $brand->id }}, '{{ $brand->brandname }}', '{{ $brand->status }}')">
                         Edit
                     </button>
 
@@ -308,7 +307,7 @@
             <!-- Brand Name -->
             <div class="form-group">
                 <label>Brand Name</label>
-                <input type="text" name="brandname" id="brandname" value="{{ old('brandname') }}" required>
+                <input type="text" name="brandname" id="brandname"  required>
                 @error('brandname')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
@@ -328,7 +327,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="cancel-btn" onclick="closeBrandPopup()">Cancel</button>
-                <button type="submit" id="saveBrandBtn" class="save-btn">Save</button>
+                <button type="submit"   id="saveBrandBtn" class="save-btn">Save</button>
             </div>
         </form>
     </div>
@@ -340,8 +339,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
     @if(session('success'))
         successMsg.innerText = "{{ session('success') }}";
         successMsg.style.display = 'block';
-
-        // Close popup after 2 seconds
+       
         setTimeout(() => {
             successMsg.style.display = 'none';
          }, 2000);
@@ -353,15 +351,26 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 </script>
 
+@if ($errors->any())
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById('brandPopup').style.display = 'flex';
+    });
+</script>
+@endif
+
 
 <script>
+
+
     function openPopup() {
     const form = document.getElementById('brandForm');
 
     document.getElementById('brandModalTitle').innerText = 'Add Brand';
     document.getElementById('saveBrandBtn').innerText = 'Save';
-    form.action = "{{ route('brand.store') }}";
+    form.action = "{{ route('brands.store') }}";
 
+    document.querySelectorAll('.text-danger').forEach(el => el.innerText = '');
     form.reset();
     document.getElementById('brand_id').value = '';
 
@@ -374,6 +383,7 @@ function openEditBrandPopup(id, name, status) {
     document.getElementById('brandModalTitle').innerText = 'Edit Brand';
     document.getElementById('saveBrandBtn').innerText = 'Update';
     form.action = "/brand/update/" + id;  
+    document.querySelectorAll('.text-danger').forEach(el => el.innerText = '');
 
     document.getElementById('brand_id').value = id;
     document.getElementById('brandname').value = name;
@@ -386,12 +396,13 @@ function closeBrandPopup() {
     document.getElementById('brandPopup').style.display = 'none';
 }
 
-window.onclick = function(event) {
-    const modal = document.getElementById('brandPopup');
-    if(event.target == modal){
-        closeBrandPopup();
-    }
-}
+// window.onclick = function(event) {
+//     const modal = document.getElementById('brandPopup');
+//     if(event.target == modal){
+//         closeBrandPopup();
+//     }
+// }
+
 
 </script>
 

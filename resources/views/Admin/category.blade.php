@@ -536,6 +536,13 @@ window.onclick = function(event) {
     }
 }
 
+window.onclick = function(event) {
+    const modal = document.getElementById('popupModel');
+    if (event.target == modal) {
+        closeBrandPopup();
+    }
+}
+
  
 </script>
 
