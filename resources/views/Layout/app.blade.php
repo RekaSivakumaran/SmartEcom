@@ -220,7 +220,14 @@
                     <li>
     <a href="{{ route('categorys.index') }}"
        class="{{ request()->routeIs('categorys.index') ? 'active' : '' }}">
-       Category
+       Main Category
+    </a>
+</li>
+
+ <li>
+    <a href="{{ route('subcategories.index') }}"
+       class="{{ request()->routeIs('subcategories.index') ? 'active' : '' }}">
+       Sub Category
     </a>
 </li>
 
