@@ -296,6 +296,12 @@
     overflow: hidden;
 }
 
+.text-danger {
+    color: red;
+    font-size: 13px;
+    margin-top: 2px;
+    display: block;
+}
 
 
 /* ===== RESPONSIVE ===== */
@@ -340,102 +346,183 @@
             <thead>
                 <tr>
                 <th>ID</th>
+                <th>Image</th>
                 <th>Category Name</th>
                 <th>Description</th>
                 <th>Status</th>
                 <th>Actions</th>
-                </tr>
+            </tr>
             </thead>
-            <tbody>
+             <tbody>
+            @foreach($categories as $category)
                 <tr>
-                     <td>1</td>
-                <td>Electronics</td>
-                <td>Gadgets, devices, and accessories</td>
-                <td>Active</td>
+                    <td>{{ $category->id }}</td>
                     <td>
-                        <button class="action-btn view-btn">View</button>
-                        <button class="action-btn edit-btn">Edit</button>
-                        <button class="action-btn delete-btn">Delete</button>
+                        @if($category->imagepath && file_exists(public_path($category->imagepath)))
+                            <img src="{{ asset($category->imagepath) }}" alt="{{ $category->Maincategoryname }}" 
+                                 style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        @else
+                            <span>No Image</span>
+                        @endif
+                    </td>
+                    <td>{{ $category->Maincategoryname }}</td>
+                    <td>{{ $category->description }}</td>
+                    <td>{{ $category->status }}</td>
+                    <td>
+                        <button class="action-btn view-btn" onclick="openEditPopup(
+                            '{{ $category->id }}',
+                            '{{ $category->Maincategoryname }}',
+                            '{{ $category->description }}',
+                            '{{ $category->status }}',
+                            '{{ asset($category->imagepath) }}'
+                        )">Edit</button>
+                        
+                        <form method="POST" action="{{ route('maincategory.destroy', $category->id) }}" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="action-btn delete-btn">Delete</button>
+                        </form>
                     </td>
                 </tr>
-                <tr>
-                     <td>2</td>
-                <td>Clothing</td>
-                <td>Apparel and fashion items</td>
-                <td>Active</td>
-                    <td>
-                        <button class="action-btn view-btn">View</button>
-                        <button class="action-btn edit-btn">Edit</button>
-                        <button class="action-btn delete-btn">Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                <td>Books</td>
-                <td>Educational books and novels</td>
-                <td>Inactive</td>
-                    <td>
-                        <button class="action-btn view-btn">View</button>
-                        <button class="action-btn edit-btn">Edit</button>
-                        <button class="action-btn delete-btn">Delete</button>
-                    </td>
-                </tr>
-            </tbody>
+            @endforeach
+        </tbody>
         </table>
     </div>
 
-<div id="popupModel" class="modal" style="display:none;">
+<div id="popupModel" class="modal">
     <div class="modal-content">
 
-        <!-- Header -->
-        <div class="modal-header">
-            <h3>Main Category</h3>
-            <span class="close-btn" onclick="closePopup()">&times;</span>
-        </div>
+        <h3 id="modalTitle">Add Main Category</h3>
 
-        <!-- Form -->
-        <form id="categoryForm" onsubmit="saveCategory(event)">
+        <!-- Success Message -->
+        @if(session('success'))
+            <div class="alert alert-success" style="margin-bottom: 10px;">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        <form id="categoryForm"
+              method="POST"
+              enctype="multipart/form-data">
+            @csrf
+            <input type="hidden" name="id" id="category_id">
+
+            <!-- Main Category Name -->
             <div class="form-group">
                 <label>Main Category</label>
-                <input type="text" required>
+                <input type="text" name="Maincategoryname" id="Maincategoryname" 
+                       value="{{ old('Maincategoryname') }}" required>
+                @error('Maincategoryname')
+                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                @enderror
             </div>
 
-           <div class="form-group">
-    <label>Description</label>
-    <textarea class="form-control textarea-large" rows="4" required></textarea>
-</div>
+            <!-- Description -->
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="description" class="form-control textarea-large" rows="4" required>{{ old('description') }}</textarea>
+                @error('description')
+                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                @enderror
+            </div>
 
-
-
+            <!-- Status -->
             <div class="form-group">
                 <label>Status</label>
-                <select>
-                    <option value="active">Active</option>
-                    <option value="block">Block</option>
+                <select name="status" id="status">
+                    <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active</option>
+                    <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
                 </select>
+                @error('status')
+                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                @enderror
             </div>
 
+            <!-- Image -->
             <div class="form-group">
                 <label>Main Category Image</label>
-                <input type="file" onchange="previewImage(event)">
+                <input type="file" name="image" accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
                 <img id="preview" style="display:none;margin-top:8px;width:120px;">
+                @error('image')
+                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                @enderror
             </div>
 
-            <!-- Footer -->
             <div class="modal-footer">
                 <button type="button" class="cancel-btn" onclick="closePopup()">Cancel</button>
-                <button type="submit" class="save-btn">Save</button>
+                <button type="submit" id="saveBtn" class="save-btn">Save</button>
             </div>
         </form>
 
     </div>
 </div>
 
+@if($errors->any())
+<script>
+    document.getElementById('popupModel').style.display = 'flex';
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    alert("{{ session('success') }}");
+</script>
+@endif
+
+
 
 
 <script>
+    
 function openPopup() {
-    document.getElementById("popupModel").style.display = "flex";
+    const form = document.getElementById('categoryForm');
+
+    document.getElementById('modalTitle').innerText = 'Add Main Category';
+    document.getElementById('saveBtn').innerText = 'Save';
+
+    form.action = "{{ route('maincategory.store') }}";
+
+    form.reset();
+    document.getElementById('category_id').value = '';
+    document.getElementById('preview').style.display = 'none';
+
+    document.getElementById('popupModel').style.display = 'flex';
+}
+
+function openEditPopup(id, name, description, status, image) {
+    const form = document.getElementById('categoryForm');
+
+    document.getElementById('modalTitle').innerText = 'Edit Main Category';
+    document.getElementById('saveBtn').innerText = 'Update';
+
+    form.action = "/main-category/update/" + id;  
+
+    document.getElementById('category_id').value = id;
+    document.getElementById('Maincategoryname').value = name;
+    document.getElementById('description').value = description;
+    document.getElementById('status').value = status;
+
+    const img = document.getElementById('preview');
+    img.src = image;
+    img.style.display = 'block';
+
+    document.getElementById('popupModel').style.display = 'flex';
+}
+
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        alert('Only JPG, JPEG, PNG files are allowed');
+        event.target.value = '';
+        return;
+    }
+
+    const img = document.getElementById('preview');
+    img.src = URL.createObjectURL(file);
+    img.style.display = 'block';
 }
 
 function closePopup() {
@@ -445,9 +532,10 @@ function closePopup() {
 window.onclick = function(event) {
     const modal = document.getElementById('popupModel');
     if (event.target == modal) {
-        closeModal();
+        closePopup();
     }
 }
+
  
 </script>
 

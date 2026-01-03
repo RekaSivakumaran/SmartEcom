@@ -218,8 +218,8 @@
                 </a>
                 <ul class="submenu">
                     <li>
-    <a href="{{ route('categorys') }}"
-       class="{{ request()->routeIs('categorys') ? 'active' : '' }}">
+    <a href="{{ route('categorys.index') }}"
+       class="{{ request()->routeIs('categorys.index') ? 'active' : '' }}">
        Category
     </a>
 </li>

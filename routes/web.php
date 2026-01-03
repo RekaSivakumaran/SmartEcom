@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CustomerController;
-
+use App\Http\Controllers\MainCategoryController;
 
  
 Route::get('/', function () {
@@ -52,6 +52,12 @@ Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
 Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
 Route::post('/customers/update-status/{id}', [CustomerController::class, 'updateStatus'])->name('customers.updateStatus');
+
+// Route::get('/main-category', [MainCategoryController::class, 'index'])->name('maincategory.index');
+Route::get('/category', [MainCategoryController::class, 'index'])->name('categorys.index');
+Route::post('/main-category/store', [MainCategoryController::class, 'store'])->name('maincategory.store');
+Route::post('/main-category/update/{id}', [MainCategoryController::class, 'update'])->name('maincategory.update');
+Route::delete('/main-category/delete/{id}', [MainCategoryController::class, 'destroy'])->name('maincategory.destroy');
 
 
 
