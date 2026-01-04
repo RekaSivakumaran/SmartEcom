@@ -67,6 +67,7 @@ Route::delete('/brand/destroy/{id}', [BrandController::class, 'destroy'])->name(
 
 
 Route::get('/subcategories', [SubCategoryController::class, 'index'])->name('subcategories.index');
+Route::post('/subcategories/store', [SubCategoryController::class, 'store'])->name('subcategories.store');
 
 
 // Route::get('/dashboard', function () {

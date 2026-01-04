@@ -20,7 +20,7 @@ class MainCategoryController extends Controller
         'Maincategoryname' => 'required|string|max:255|unique:main_categories,Maincategoryname',
         'description'      => 'required|string',
         'status'           => 'required|in:Active,Inactive',
-        'image'            => 'required|image|mimes:jpg,jpeg,png|max:2048',
+        // 'image'            => 'required|image|mimes:jpg,jpeg,png|max:2048',
     ]);
 
     $folderPath = public_path('image/MainCategory');
@@ -50,7 +50,7 @@ class MainCategoryController extends Controller
     }
 
     public function update(Request $request, $id)
-{
+    {
     // Validate input
     $request->validate([
         'Maincategoryname' => 'required|string|max:255|unique:main_categories,Maincategoryname,' . $id,

@@ -360,12 +360,14 @@
 <tr>
     <td>{{ $subcategory->id }}</td>
     <td>
-        @if($subcategory->imagepath && file_exists(public_path($subcategory->imagepath)))
-            <img src="{{ asset($subcategory->imagepath) }}" alt="{{ $subcategory->sub_category_name }}" 
-                 style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
-        @else
-            <span>No Image</span>
-        @endif
+    @if($subcategory->image && file_exists(public_path($subcategory->image)))
+        <img src="{{ asset($subcategory->image) }}" 
+             alt="{{ $subcategory->sub_category_name }}" 
+             style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+    @else
+        <span>No Image</span>
+    @endif
+</td>
     </td>
     <td>{{ $subcategory->sub_category_name }}</td>
     <td>{{ $subcategory->description }}</td>
@@ -391,87 +393,92 @@
 
         <h3 id="modalTitle">Add Sub Category</h3>
 
-        <!-- Success Message -->
-        @if(session('success'))
-            <div class="alert alert-success" style="margin-bottom: 10px;">
-                {{ session('success') }}
-            </div>
-        @endif
-
         <form id="categoryForm"
               method="POST"
               enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="id" id="category_id">
 
-            <!-- Main Category Name -->
+            <!-- Sub Category Name -->
             <div class="form-group">
-                <label>Sub Category</label>
-                <input type="text" name="Maincategoryname" id="Maincategoryname" 
-                       value="{{ old('Maincategoryname') }}" required>
-                @error('Maincategoryname')
-                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                <label>Sub Category Name</label>
+                <input type="text"
+                       name="sub_category_name"
+                       id="sub_category_name"
+                       value="{{ old('sub_category_name') }}"
+                       required>
+                @error('sub_category_name')
+                    <span class="text-danger error-text">{{ $message }}</span>
                 @enderror
             </div>
 
             <!-- Description -->
             <div class="form-group">
                 <label>Description</label>
-                <textarea name="description" id="description" class="form-control textarea-large" rows="4" required>{{ old('description') }}</textarea>
+                <textarea name="description"
+                          id="description"
+                          rows="4"
+                          required>{{ old('description') }}</textarea>
                 @error('description')
-                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                    <span class="text-danger error-text">{{ $message }}</span>
                 @enderror
             </div>
 
-             <div class="form-group">
-    <label>Main Category</label>
-    <select name="maincategory_id" class="form-control">
-    <option value="">-- Select Main Category --</option>
-    @foreach($mainCategories as $main)
-        <option value="{{ $main->id }}"
-            {{ old('maincategory_id') == $main->id ? 'selected' : '' }}>
-            {{ $main->Maincategoryname }}
-        </option>
-    @endforeach
-</select>
-
-
-    @error('role_id')
-        <span class="error-msg validation-error">{{ $message }}</span>
-    @enderror
-</div>
+            <!-- Main Category -->
+            <div class="form-group">
+                <label>Main Category</label>
+                <select name="main_category_id" id="main_category_id" required>
+                    <option value="">-- Select Main Category --</option>
+                    @foreach($mainCategories as $main)
+                        <option value="{{ $main->id }}"
+                            {{ old('main_category_id') == $main->id ? 'selected' : '' }}>
+                            {{ $main->Maincategoryname }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('main_category_id')
+                    <span class="text-danger error-text">{{ $message }}</span>
+                @enderror
+            </div>
 
             <!-- Status -->
             <div class="form-group">
                 <label>Status</label>
                 <select name="status" id="status">
-                    <option value="Active" {{ old('status') == 'Active' ? 'selected' : '' }}>Active</option>
-                    <option value="Inactive" {{ old('status') == 'Inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="Active" {{ old('status')=='Active'?'selected':'' }}>Active</option>
+                    <option value="Inactive" {{ old('status')=='Inactive'?'selected':'' }}>Inactive</option>
                 </select>
                 @error('status')
-                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                    <span class="text-danger error-text">{{ $message }}</span>
                 @enderror
             </div>
 
             <!-- Image -->
             <div class="form-group">
                 <label>Sub Category Image</label>
-                <input type="file" name="image" accept=".jpg,.jpeg,.png" onchange="previewImage(event)">
-                <img id="preview" style="display:none;margin-top:8px;width:120px;">
+                <input type="file"
+                       name="image"
+                       accept="image/*"
+                       onchange="previewImage(event)">
+                <img id="preview"
+                     style="display:none;margin-top:8px;width:120px;">
                 @error('image')
-                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                    <span class="text-danger error-text">{{ $message }}</span>
                 @enderror
             </div>
 
+            <!-- Buttons -->
             <div class="modal-footer">
-                <button type="button" class="cancel-btn" onclick="closePopup()">Cancel</button>
-                <button type="submit" id="saveBtn" class="save-btn">Save</button>
+                <button type="button" class="cancel-btn"
+                        onclick="closePopup()">Cancel</button>
+                <button type="submit" id="saveBtn"
+                        class="save-btn">Save</button>
             </div>
         </form>
-
     </div>
 </div>
 
+<!-- Auto open popup on validation error -->
 @if($errors->any())
 <script>
     document.getElementById('popupModel').style.display = 'flex';
@@ -488,38 +495,40 @@
 
 
 <script>
-    
 function openPopup() {
     const form = document.getElementById('categoryForm');
 
-    document.getElementById('modalTitle').innerText = 'Add Main Category';
+    document.getElementById('modalTitle').innerText = 'Add Sub Category';
     document.getElementById('saveBtn').innerText = 'Save';
 
-    form.action = "{{ route('maincategory.store') }}";
-
+    form.action = "{{ route('subcategories.store') }}";
     form.reset();
+
     document.getElementById('category_id').value = '';
     document.getElementById('preview').style.display = 'none';
 
     document.getElementById('popupModel').style.display = 'flex';
 }
 
-function openEditPopup(id, name, description, status, image) {
+function openEditPopup(id, name, description, mainId, status, image) {
     const form = document.getElementById('categoryForm');
 
-    document.getElementById('modalTitle').innerText = 'Edit Main Category';
+    document.getElementById('modalTitle').innerText = 'Edit Sub Category';
     document.getElementById('saveBtn').innerText = 'Update';
 
-    form.action = "/main-category/update/" + id;  
+    form.action = "/subcategories/update/" + id;
 
     document.getElementById('category_id').value = id;
-    document.getElementById('Maincategoryname').value = name;
+    document.getElementById('sub_category_name').value = name;
     document.getElementById('description').value = description;
+    document.getElementById('main_category_id').value = mainId;
     document.getElementById('status').value = status;
 
     const img = document.getElementById('preview');
-    img.src = image;
-    img.style.display = 'block';
+    if (image) {
+        img.src = image;
+        img.style.display = 'block';
+    }
 
     document.getElementById('popupModel').style.display = 'flex';
 }
@@ -528,37 +537,21 @@ function previewImage(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    const allowedTypes = ['image/jpeg', 'image/png'];
-    if (!allowedTypes.includes(file.type)) {
-        alert('Only JPG, JPEG, PNG files are allowed');
-        event.target.value = '';
-        return;
-    }
-
     const img = document.getElementById('preview');
     img.src = URL.createObjectURL(file);
     img.style.display = 'block';
 }
 
 function closePopup() {
-    document.getElementById("popupModel").style.display = "none";
+    document.getElementById('popupModel').style.display = 'none';
 }
 
-window.onclick = function(event) {
+window.onclick = function (event) {
     const modal = document.getElementById('popupModel');
-    if (event.target == modal) {
+    if (event.target === modal) {
         closePopup();
     }
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('popupModel');
-    if (event.target == modal) {
-        closeBrandPopup();
-    }
-}
-
- 
+};
 </script>
 
 

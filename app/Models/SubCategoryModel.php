@@ -21,6 +21,6 @@ class SubCategoryModel extends Model
      
     public function mainCategory()
     {
-        return $this->belongsTo(MainCategory::class, 'main_category_id');
+        return $this->belongsTo(MainCategoryModel::class, 'main_category_id'); // ✔ matches your model
     }
 }
