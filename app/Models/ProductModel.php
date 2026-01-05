@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class ProductModel extends Model
 {
      use HasFactory;
+     protected $table = 'products';
 
     protected $fillable = [
         'name',
@@ -22,14 +25,14 @@ class ProductModel extends Model
     ];
     
     public function mainCategory() {
-        return $this->belongsTo(MainCategory::class);
+        return $this->belongsTo(MainCategoryModel::class);
     }
 
     public function subCategory() {
-        return $this->belongsTo(SubCategory::class);
+        return $this->belongsTo(SubCategoryModel::class);
     }
 
     public function brand() {
-        return $this->belongsTo(Brand::class);
+        return $this->belongsTo(BrandModel::class);
     }
 }

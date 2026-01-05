@@ -529,20 +529,35 @@ window.addEventListener('DOMContentLoaded', (event) => {
 
 
 <script>
-function openPopup() {
-    const form = document.getElementById('categoryForm');
+function openAddItemPopup() {
+    const form = document.getElementById('itemForm');
 
-    document.getElementById('modalTitle').innerText = 'Add Sub Category';
+    // Update modal title and submit button text
+    document.getElementById('modalTitle').innerText = 'Add Item';
     document.getElementById('saveBtn').innerText = 'Save';
 
-    form.action = "{{ route('subcategories.store') }}";
+    // Set form action to Laravel route
+    form.action = "{{ route('products.store') }}"; // <-- your store route
+
+    // Reset the form
     form.reset();
 
-    document.getElementById('category_id').value = '';
-    document.getElementById('preview').style.display = 'none';
+    // Clear hidden product_id for edit
+    const hiddenId = document.getElementById('product_id');
+    if (hiddenId) hiddenId.value = '';
 
-    document.getElementById('popupModel').style.display = 'flex';
+    // Hide image preview if you have one
+    const preview = document.getElementById('preview');
+    if (preview) preview.style.display = 'none';
+
+    // Disable discount inputs by default
+    document.getElementById('discount_rate').disabled = true;
+    document.getElementById('discount_amount').disabled = true;
+
+    // Show the popup
+    document.getElementById('itemPopup').style.display = 'flex';
 }
+
 
 function openEditPopup(id, name, description, mainId, status, image) {
     const form = document.getElementById('categoryForm');
