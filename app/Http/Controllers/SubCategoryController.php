@@ -22,19 +22,19 @@ class SubCategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-        'sub_category_name' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('sub_categories')->where(function ($query) use ($request) {
-                return $query->where('main_category_id', $request->main_category_id);
-            }),
-        ],
-        'description'       => 'required|string',
-        'main_category_id'  => 'required|exists:main_categories,id',
-        'status'            => 'required|in:Active,Inactive',
+                'sub_category_name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('sub_categories')->where(function ($query) use ($request) {
+                    return $query->where('main_category_id', $request->main_category_id);
+                }),
+            ],
+            'description'       => 'required|string',
+            'main_category_id'  => 'required|exists:main_categories,id',
+            'status'            => 'required|in:Active,Inactive',
         // 'image'             => 'required|image|mimes:jpg,jpeg,png|max:2048',
-    ]);
+        ]);
 
         $folderPath = public_path('image/SubCategory');
 
@@ -45,31 +45,100 @@ class SubCategoryController extends Controller
         $imagePath = null;
 
         if ($request->hasFile('image')) {
-    $image = $request->file('image');
-    $imageName = str_replace(' ', '_', $request->sub_category_name)
+            $image = $request->file('image');
+            $imageName = str_replace(' ', '_', $request->sub_category_name)
                . '_mc' . $request->main_category_id
                . '.' . $image->getClientOriginalExtension();
 
-    $image->move($folderPath, $imageName);
-    $imagePath = 'image/SubCategory/' . $imageName;
-} else {
-    return back()->withErrors(['image' => 'Please upload an image']);
-}
+            $image->move($folderPath, $imageName);
+            $imagePath = 'image/SubCategory/' . $imageName;
+            } else {
+            return back()->withErrors(['image' => 'Please upload an image']);
+        }
 
 
     
-
-    // Save
-    SubCategoryModel::create([
+        SubCategoryModel::create([
         'sub_category_name' => $request->sub_category_name,
         'description'       => $request->description,
         'main_category_id'  => $request->main_category_id,
         'status'            => $request->status,
         'image'             => 'image/SubCategory/'.$imageName,
-    ]);
+        ]);
 
         return redirect()->back()->with('success', 'Sub Category added successfully!');
     }
+
+    public function update(Request $request, $id)
+    {
+        $subCategory = SubCategoryModel::findOrFail($id);
+
+        $request->validate([
+        'sub_category_name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('sub_categories')
+                ->where(function ($query) use ($request) {
+                    return $query->where('main_category_id', $request->main_category_id);
+                })
+                ->ignore($id),  
+        ],
+        'description'       => 'required|string',
+        'main_category_id'  => 'required|exists:main_categories,id',
+        'status'            => 'required|in:Active,Inactive',
+        'image'             => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $folderPath = public_path('image/SubCategory');
+
+            if (!File::exists($folderPath)) {
+            File::makeDirectory($folderPath, 0777, true);
+        }
+
+        $imagePath = $subCategory->image;  
+
+        if ($request->hasFile('image')) {
+
+        // 🔴 delete old image
+        if ($subCategory->image && File::exists(public_path($subCategory->image))) {
+            File::delete(public_path($subCategory->image));
+        }
+
+        $image = $request->file('image');
+        $imageName = str_replace(' ', '_', $request->sub_category_name)
+            . '_mc' . $request->main_category_id
+            . '.' . $image->getClientOriginalExtension();
+
+        $image->move($folderPath, $imageName);
+        $imagePath = 'image/SubCategory/' . $imageName;
+    }
+
+    $subCategory->update([
+        'sub_category_name' => $request->sub_category_name,
+        'description'       => $request->description,
+        'main_category_id'  => $request->main_category_id,
+        'status'            => $request->status,
+        'image'             => $imagePath,
+    ]);
+
+    return redirect()->back()->with('success', 'Sub Category updated successfully!');
+}
+
+    public function destroy($id)
+    {
+        $subCategory = SubCategoryModel::findOrFail($id);
+
+        // Delete image file if exists
+        if($subCategory->image && File::exists(public_path($subCategory->image))){
+        File::delete(public_path($subCategory->image));
+        }
+
+        $subCategory->delete();
+
+        return redirect()->back()->with('success', 'Sub Category deleted successfully!');
+    }
+
 
 //     public function update(Request $request, $id)
 // {

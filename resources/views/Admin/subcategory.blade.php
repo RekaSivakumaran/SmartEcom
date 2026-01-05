@@ -325,11 +325,15 @@
 
  <div class="button-container">
     <h2 style="font-size: 25px;">Category Management</h2>
-
+  @if(session('success'))
+            <div id="brandSuccessMsg" class="alert alert-success"  style="display:none; margin-left: 270px; padding: 8px 10px; font-size: 14px; color: #28a745; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px;">
+                {{ session('success') }}
+            </div>
+        @endif
    <div class="action-buttons">
     <button class="action-btn add-btn" onclick="openPopup()">Add Category</button>
     <!-- <button class="action-btn" style="background-color:#6c757d;">Export CSV</button> -->
-    <button class="action-btn" style="background-color:#17a2b8;">Refresh Table</button>
+    <!-- <button class="action-btn" style="background-color:#17a2b8;">Refresh Table</button> -->
 </div>
 </div>
 
@@ -373,9 +377,28 @@
     <td>{{ $subcategory->description }}</td>
     <td>{{ $subcategory->mainCategory->Maincategoryname ?? 'N/A' }}</td>
     <td>{{ $subcategory->status }}</td>
-    <td>
-        <!-- Actions buttons -->
-    </td>
+      <td>
+        <button class="action-btn edit-btn" 
+        onclick="openEditPopup(
+            {{ $subcategory->id }}, 
+            '{{ $subcategory->sub_category_name }}', 
+            '{{ $subcategory->description }}', 
+            {{ $subcategory->main_category_id }}, 
+            '{{ $subcategory->status }}', 
+            '{{ $subcategory->image }}'
+        )">
+        Edit
+        </button>
+
+
+                <form method="POST" action="{{ route('sub-category.destroy', $subcategory->id) }}" style="display:inline;">
+                    @csrf
+                    <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this sub-category?')">
+                    Delete
+                    </button>
+                </form>
+
+            </td>
 </tr>
 @endforeach
 
@@ -485,12 +508,23 @@
 </script>
 @endif
 
-@if(session('success'))
-<script>
-    alert("{{ session('success') }}");
-</script>
-@endif
+ <script>
+window.addEventListener('DOMContentLoaded', (event) => {
+    const successMsg = document.getElementById('brandSuccessMsg');
+    @if(session('success'))
+        successMsg.innerText = "{{ session('success') }}";
+        successMsg.style.display = 'block';
+       
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+         }, 2000);
 
+         
+    @endif
+});
+
+
+</script>
 
 
 
@@ -546,12 +580,12 @@ function closePopup() {
     document.getElementById('popupModel').style.display = 'none';
 }
 
-window.onclick = function (event) {
-    const modal = document.getElementById('popupModel');
-    if (event.target === modal) {
-        closePopup();
-    }
-};
+// window.onclick = function (event) {
+//     const modal = document.getElementById('popupModel');
+//     if (event.target === modal) {
+//         closePopup();
+//     }
+// };
 </script>
 
 
