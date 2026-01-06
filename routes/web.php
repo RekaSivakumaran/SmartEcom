@@ -71,6 +71,8 @@ Route::post('/subcategories/store', [SubCategoryController::class, 'store'])->na
 Route::post('/subcategories/update/{id}', [SubCategoryController::class, 'update'])->name('sub-category.update');
 Route::post('/subcategories/delete/{id}', [SubCategoryController::class, 'destroy'])->name('sub-category.destroy');
 
+Route::get('/Products', [ProductController::class, 'index'])->name('products.index');
+
 
 
 

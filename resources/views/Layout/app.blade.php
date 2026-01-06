@@ -239,8 +239,8 @@
 </li>
 
  <li>
-    <a href="{{ route('products') }}"
-       class="{{ request()->routeIs('products') ? 'active' : '' }}">
+    <a href="{{ route('products.index') }}"
+       class="{{ request()->routeIs('products.index') ? 'active' : '' }}">
        Products
     </a>
 </li>
@@ -251,7 +251,7 @@
                 </ul>
             </li>           
             <li><a href="#"><i class="fa-solid fa-receipt icon"></i> Orders</a></li>
-            <li><a href="#"><i class="fa-solid fa-file-invoice icon"></i> Report</a></li>
+            <!-- <li><a href="#"><i class="fa-solid fa-file-invoice icon"></i> Report</a></li> -->
             <li><a href="#"><i class="fa-solid fa-arrow-right-from-bracket icon"></i> Log Out</a></li>
 
         </ul>

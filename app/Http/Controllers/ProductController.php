@@ -3,18 +3,23 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\ProductModel;
+use App\Models\MainCategoryModel;
+use App\Models\SubCategoryModel;
+use App\Models\BrandModel;
 
 class ProductController extends Controller
 {
    public function index()
     {
-        $users = Main::with('role')->orderBy('id', 'desc')->get();
+        $mainCategories = MainCategoryModel::select('id', 'Maincategoryname')->get();
+        $subcategories = SubCategoryModel::select('id','sub_category_name','main_category_id')->where('status', 'active')->get();
 
-        $roles = RoleModel::where('is_active', 1)
-                      ->orderBy('id', 'asc')
-                      ->get();
+        $Brands = BrandModel::select('id','brandname')->get();
+        $products = Product::all();
 
-        return view('Admin.user', compact('users', 'roles'));
+
+        return view('Admin.product', compact('mainCategories', 'subcategories', 'Brands', 'products'));
     }
 
 }
