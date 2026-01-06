@@ -101,9 +101,20 @@ class LoginController extends Controller
             return redirect('/admin/login');
         }
 
-        return view('Admin.dashboard', [
-            'admin_name' => $request->session()->get('admin_name')
-        ]);
+        // return view('Admin.dashboard', [
+        //     'admin_name' => $request->session()->get('admin_name')
+        // ]);
+
+ 
+
+    $admin = UserModel::with('role')->find($request->session()->get('admin_id'));
+
+    return view('Admin.dashboard', [
+        'admin_name' => $admin->name,
+        'role_name'  => $admin->role->name ?? 'No Role'
+    ]);
+
+
         // if (!$request->session()->has('admin_id')) {
         //     return redirect('/admin/login');
         // }

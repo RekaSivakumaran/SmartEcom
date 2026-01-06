@@ -276,10 +276,10 @@
                 <img src="{{ asset('Image/userIMG.jpg') }}" class="avatar" alt="User Avatar" >
 
                 <!-- <img src="https://i.pravatar.cc/40" class="avatar" /> -->
-                <div class="info">
-                    <h4>Reka</h4>
-                    <p>Admin</p>
-                </div>
+                 <div class="info">
+                <h4>{{ $admin_name }}</h4> <!-- Display username -->
+                <p>{{ $role_name }}</p>    <!-- Display role name -->
+            </div>
             </div>
         </div>
 
