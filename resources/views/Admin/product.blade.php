@@ -244,6 +244,11 @@
 
  <div class="button-container">
     <h2 style="font-size: 25px;">Product Management</h2>
+     @if(session('success'))
+            <div id="brandSuccessMsg" class="alert alert-success"  style="display:none; margin-left: 270px; padding: 8px 10px; font-size: 14px; color: #28a745; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 5px;">
+                {{ session('success') }}
+            </div>
+        @endif
 
    <div class="action-buttons">
     <button class="action-btn add-btn" onclick="openAddItemPopup()">Add Product</button>
@@ -308,9 +313,14 @@
     </td>
 
     <td>
-        <button class="action-btn view-btn">View</button>
-        <button class="action-btn edit-btn">Edit</button>
-        <button class="action-btn delete-btn">Delete</button>
+        
+        <button class="action-btn edit-btn" onclick="editItem({{ $product->id }})">Edit</button>
+        <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this product?');">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="action-btn delete-btn">Delete</button>
+</form>
+
     </td>
 </tr>
 @empty
@@ -328,7 +338,7 @@
         <h3 id="modalTitle">Add Item</h3>
 
 
-        <form id="itemForm" method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
+        <form id="itemForm" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- Row 1: Item Name + Price -->
@@ -371,13 +381,6 @@
                     <label>Sub Category</label>
                     <select name="sub_category_id" id="sub_category_id">
                         <option value="">Select Sub Category</option>
-                        @foreach($subcategories as $sub)
-                            <option value="{{ $sub->id }}" 
-                                data-main="{{ $sub->main_category_id }}"
-                                {{ old('sub_category_id') == $sub->id ? 'selected' : '' }}>
-                                {{ $sub->sub_category_name }}
-                            </option>
-                        @endforeach
                     </select>
                     @error('sub_category_id')
                         <span class="text-danger">{{ $message }}</span>
@@ -479,6 +482,29 @@
     });
 </script>
 
+<script>
+window.addEventListener('DOMContentLoaded', (event) => {
+    const successMsg = document.getElementById('brandSuccessMsg');
+    @if(session('success'))
+        successMsg.innerText = "{{ session('success') }}";
+        successMsg.style.display = 'block';
+       
+        setTimeout(() => {
+            successMsg.style.display = 'none';
+         }, 2000);
+
+         
+    @endif
+});
+
+
+</script>
+<script>
+    const subcategories = @json($subcategories);
+    const products = @json($products);
+</script>
+
+
 
 <script>
 
@@ -517,17 +543,109 @@ discountRate.addEventListener('input', () => { if(discountType.value==='rate') r
 discountAmount.addEventListener('input', () => { if(discountType.value==='amount') recalcDiscount(); });
 price.addEventListener('input', recalcDiscount);
 
+document.getElementById('main_category_id').addEventListener('change', function () {
+    const mainId = this.value;
+    const subSelect = document.getElementById('sub_category_id');
+
+    // Always reset subcategory
+    subSelect.innerHTML = '<option value="">Select Sub Category</option>';
+
+    if (!mainId) return;
+
+    subcategories.forEach(sc => {
+        if (sc.main_category_id == mainId) {
+            const option = document.createElement('option');
+            option.value = sc.id;
+            option.textContent = sc.sub_category_name;
+            subSelect.appendChild(option);
+        }
+    });
+});
+
 
 
 function openAddItemPopup() {
     document.getElementById('modalTitle').textContent = 'Add Item';
-    document.getElementById('itemForm').reset();
+
+    const form = document.getElementById('itemForm'); 
+    form.action = "{{ route('products.store') }}";
+    form.reset();
+
     const hiddenId = document.getElementById('product_id');
-    if(hiddenId) hiddenId.value = '';
+    if (hiddenId) hiddenId.value = '';
+    document.getElementById('sub_category_id').innerHTML =
+        '<option value="">Select Sub Category</option>';
+
     document.getElementById('discount_rate').disabled = true;
     document.getElementById('discount_amount').disabled = true;
+
+    document.getElementById('itemPopup').style.display = 'flex';  
+}
+
+ function editItem(productId){
+    const product = products.find(p => p.id == productId);
+    if(!product) return;
+
+    const form = document.getElementById('itemForm');
+    form.reset();
+
+    document.getElementById('modalTitle').textContent = 'Edit Item';
+    form.action = `/products/${product.id}`;
+
+    // Ensure _method input exists
+    let methodInput = form.querySelector("input[name='_method']");
+    if(!methodInput){
+        methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        form.appendChild(methodInput);
+    }
+    methodInput.value = 'PUT';
+
+    // Use querySelector to access each input safely
+    form.querySelector('input[name="product_id"]').value = product.id;
+    form.querySelector('input[name="item_name"]').value = product.name; // <--- use product.name not product.item_name
+    form.querySelector('input[name="price"]').value = product.price;
+    form.querySelector('input[name="quantity"]').value = product.quantity ?? 0;
+    form.querySelector('select[name="status"]').value = product.status;
+    form.querySelector('select[name="brand_id"]').value = product.brand_id ?? '';
+
+    document.getElementById('main_category_id').value = product.main_category_id;
+
+    const subSelect = document.getElementById('sub_category_id');
+    subSelect.innerHTML = '<option value="">Select Sub Category</option>';
+    subcategories
+        .filter(sc => sc.main_category_id == product.main_category_id)
+        .forEach(sc => {
+            const opt = document.createElement('option');
+            opt.value = sc.id;
+            opt.textContent = sc.sub_category_name;
+            subSelect.appendChild(opt);
+        });
+    subSelect.value = product.sub_category_id;
+
+    const discountTypeEl = document.getElementById('discount_type');
+    const discountRateEl = document.getElementById('discount_rate');
+    const discountAmountEl = document.getElementById('discount_amount');
+
+    discountTypeEl.value = product.discount_type;
+    discountRateEl.disabled = true;
+    discountAmountEl.disabled = true;
+
+    if(product.discount_type === 'rate'){
+        discountRateEl.disabled = false;
+        discountRateEl.value = product.discount_rate;
+        discountAmountEl.value = product.discount_amount;
+    }
+    if(product.discount_type === 'amount'){
+        discountAmountEl.disabled = false;
+        discountAmountEl.value = product.discount_amount;
+        discountRateEl.value = product.discount_rate;
+    }
+
     document.getElementById('itemPopup').style.display = 'flex';
 }
+
 function closeItemPopup() {
     document.getElementById('itemPopup').style.display = 'none';
 }

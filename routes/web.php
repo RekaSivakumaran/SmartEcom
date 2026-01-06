@@ -7,6 +7,7 @@ use App\Http\Controllers\MainCategoryController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -74,7 +75,10 @@ Route::post('/subcategories/delete/{id}', [SubCategoryController::class, 'destro
 
 Route::get('/Products', [ProductController::class, 'index'])->name('products.index');
 Route::post('/products/store', [ProductController::class, 'store'])->name('products.store');
+Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
 
 
