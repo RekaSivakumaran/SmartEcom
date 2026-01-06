@@ -100,7 +100,7 @@ class SubCategoryController extends Controller
 
         if ($request->hasFile('image')) {
 
-        // 🔴 delete old image
+        
         if ($subCategory->image && File::exists(public_path($subCategory->image))) {
             File::delete(public_path($subCategory->image));
         }
