@@ -340,8 +340,8 @@
 
         <form id="itemForm" method="POST" enctype="multipart/form-data">
             @csrf
-
-            <!-- Row 1: Item Name + Price -->
+            <input type="hidden" id="product_id" name="product_id">
+             
             <div class="form-row">
                 <input type="hidden" id="product_id" name="product_id">
 
@@ -565,10 +565,11 @@ document.getElementById('main_category_id').addEventListener('change', function 
 
 
 function openAddItemPopup() {
+    const productStoreRoute = "{{ route('products.store') }}";
     document.getElementById('modalTitle').textContent = 'Add Item';
 
     const form = document.getElementById('itemForm'); 
-    form.action = "{{ route('products.store') }}";
+    form.action = productStoreRoute;
     form.reset();
 
     const hiddenId = document.getElementById('product_id');
@@ -647,8 +648,14 @@ function openAddItemPopup() {
 }
 
 function closeItemPopup() {
+    const form = document.getElementById('itemForm');
+    form.reset();
+    form.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
+    document.getElementById('discount_rate').disabled = true;
+    document.getElementById('discount_amount').disabled = true;
     document.getElementById('itemPopup').style.display = 'none';
 }
+
 </script>
 
 

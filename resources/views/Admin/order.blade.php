@@ -48,13 +48,13 @@
         }
 
         table {
-            width: 100%;
+            width: 98%;
             border-collapse: collapse;
             min-width: 500px;
         }
 
         th, td {
-            padding: 12px 15px;
+            padding: 10px 12.5px;
             text-align: left;
         }
 
@@ -130,8 +130,8 @@
 .modal-content {
     background: #fff;
     padding: 20px;
-    width: 500px;
-    max-height: 80%;
+    width: 600px;
+    max-height: 90%;
     overflow-y: auto;
     border-radius: 10px;
     box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
@@ -152,14 +152,14 @@
 }
 
 #orderItemsTable th {
-    background-color: #f5f5f5;
+    background-color: #827e7eff;
     font-weight: 600;
 }
 
 /* Images in table */
 #orderItemsTable img {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     object-fit: cover;
     border-radius: 5px;
 }
@@ -172,16 +172,16 @@
 
 /* Close button */
 .close-btn {
-    background-color: #007bff;
+    background-color: #bc1919ff;
     color: #fff;
     border: none;
-    padding: 8px 16px;
+    padding: 5px 11px;
     border-radius: 5px;
     cursor: pointer;
 }
 
 .close-btn:hover {
-    background-color: #0056b3;
+    background-color: #bc1919ff;
 }
 
 
@@ -277,14 +277,14 @@
             <td>{{ $order->payment_status }}</td>
             <td>Rs. {{ number_format($order->total, 2) }}</td>
             <td>
-                        <button class="action-btn view-btn" onclick="openOrderItems({{ $order->id }})">View</button>
+                        <button class="action-btn view-btn" onclick="openOrderItems({{ $order->id }})">View Items</button>
 
                 <!-- @foreach($order->items as $item)
                     {{ $item->product->name ?? 'Product deleted' }} (x{{ $item->quantity }}) <br>
                 @endforeach -->
             </td>
             <td>
-                    <button class="action-btn edit-btn" onclick="openOrderItems({{ $order->id }})">View Items</button>
+                    <button class="action-btn edit-btn" onclick="openOrderItems({{ $order->id }})">Edit</button>
                  
             </td>
         </tr>
@@ -334,7 +334,12 @@
     order.items.forEach(item => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${item.image_path ? `<img src="/${item.image_path}" />` : 'No Image'}</td>
+           <td>
+  ${item.image_path 
+      ? `<img src="/image/Products/${item.image_path}" alt="Product" width="80" height="80" style="object-fit:cover;">`
+      : 'No Image'}
+</td>
+
             <td>${item.product ? item.product.name : 'Deleted Product'}</td>
             <td>${item.quantity}</td>
             <td>Rs.${parseFloat(item.price).toFixed(2)}</td>
