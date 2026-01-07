@@ -80,6 +80,7 @@ Route::put('/products/{product}', [ProductController::class, 'update'])->name('p
 Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+Route::put('/orders/{id}', [OrderController::class, 'update'])->name('orders.update');
 
 Route::get('/Login', [LoginController::class, 'showLoginForm'])->name('Admin.login');
 Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.login.submit');
@@ -87,6 +88,21 @@ Route::get('/admin/dashboard', [LoginController::class, 'dashboard']);
 Route::get('/admin/logout', [LoginController::class, 'logout']);
 
 
+
+
 // Route::get('/dashboard', function () {
 //     return view('Admin.Dashboard');
 // })->name('dashboard');
+
+
+Route::get('/client', function () {
+    return view('Client.home');
+})->name('home');
+
+Route::get('/client/about', function () {
+    return view('Client.about');   
+})->name('about');
+
+Route::get('/client/contactus', function () {
+    return view('Client.contactus');   
+})->name('contactus');
