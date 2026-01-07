@@ -10,7 +10,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $orders = OrderModel::with(['items.product'])->get();
+         $orders = OrderModel::with(['items.product'])->get();
 
         return view('Admin.order', compact('orders'));
 
