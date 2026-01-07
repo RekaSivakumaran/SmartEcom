@@ -277,8 +277,13 @@
 
                 <!-- <img src="https://i.pravatar.cc/40" class="avatar" /> -->
                  <div class="info">
-                <h4>{{ $admin_name }}</h4> <!-- Display username -->
-                <p>{{ $role_name }}</p>    <!-- Display role name -->
+                @php
+    $admin = \App\Models\UserModel::with('role')
+        ->find(session('admin_id'));
+@endphp
+
+<h4>{{ $admin->name ?? 'Admin' }}</h4>
+<p>{{ $admin->role->name ?? 'Admin' }}</p>
             </div>
             </div>
         </div>

@@ -185,6 +185,37 @@
 }
 
 
+.modalOrder {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+.modalOrder-content {
+    background: #fff;
+    padding: 20px;
+    width: 70%;
+    max-height: 90%;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+table th, table td {
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+}
+.modalOrder-footer {
+    text-align: right;
+    margin-top: 10px;
+}
+
+
         /* Responsive */
         @media(max-width: 768px) {
             th, td {
@@ -284,8 +315,7 @@
                 @endforeach -->
             </td>
             <td>
-                    <button class="action-btn edit-btn" onclick="openOrderItems({{ $order->id }})">Edit</button>
-                 
+                    <button class="action-btn edit-btn" onclick="openEditOrder({{ $order->id }})">Edit</button>                 
             </td>
         </tr>
         @empty
@@ -321,6 +351,79 @@
     </div>
 </div>
 
+<div id="editOrderPopup" class="modalOrder">
+    <div class="modalOrder-content">
+        <h3>Edit Order</h3>
+
+        <form id="editOrderForm" method="POST">
+            @csrf
+            <input type="hidden" name="_method" value="PUT">
+
+            <label>Bill No</label>
+            <input type="text" id="bill_no" readonly>
+
+            <label>Name</label>
+            <input type="text" id="name" readonly>
+
+            <label>Email</label>
+            <input type="text" id="email" readonly>
+
+            <label>Mobile</label>
+            <input type="text" id="mobile" readonly>
+
+            <h4>Billing Address</h4>
+            <input id="billing_address1" readonly>
+            <input id="billing_address2" readonly>
+            <input id="billing_city" readonly>
+            <input id="billing_country" readonly>
+            <input id="billing_postcode" readonly>
+
+            <h4>Shipping Address</h4>
+            <input id="shipping_address1" readonly>
+            <input id="shipping_address2" readonly>
+            <input id="shipping_city" readonly>
+            <input id="shipping_country" readonly>
+            <input id="shipping_postcode" readonly>
+
+            <h4>Order Items</h4>
+            <table id="orderItemsTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <label>Order Status</label>
+            <select name="status" id="status">
+                <option>Pending</option>
+                <option>Processing</option>
+                <option>Completed</option>
+                <option>Cancelled</option>
+            </select>
+
+            <label>Payment Status</label>
+            <select name="payment_status" id="payment_status">
+                <option>Pending</option>
+                <option>Paid</option>
+                <option>Failed</option>
+            </select>
+
+            <div class="modalOrder-footer">
+                <button type="button" onclick="closeEditOrder()">Cancel</button>
+                <button type="submit">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+ 
+
 <script>
     const orders = @json($orders);
 
@@ -353,6 +456,60 @@
 
 function closeOrderItems(){
     document.getElementById('orderItemsPopup').style.display = 'none';
+}
+
+
+
+ function openEditOrder(orderId) {
+    const order = orders.find(o => o.id == orderId);
+    if (!order) {
+        alert('Order not found');
+        return;
+    }
+
+    const form = document.getElementById('editOrderForm');
+    form.action = `/orders/${order.id}`;
+
+    bill_no.value = order.bill_no;
+    name.value = order.name;
+    email.value = order.email;
+    mobile.value = order.mobile;
+
+    billing_address1.value = order.billing_address1;
+    billing_address2.value = order.billing_address2;
+    billing_city.value = order.billing_city;
+    billing_country.value = order.billing_country;
+    billing_postcode.value = order.billing_postcode;
+
+    shipping_address1.value = order.shipping_address1;
+    shipping_address2.value = order.shipping_address2;
+    shipping_city.value = order.shipping_city;
+    shipping_country.value = order.shipping_country;
+    shipping_postcode.value = order.shipping_postcode;
+
+    status.value = order.status;
+    payment_status.value = order.payment_status;
+
+    const tbody = document.querySelector('#orderItemsTable tbody');
+    tbody.innerHTML = '';
+
+    order.items.forEach(item => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.product?.name ?? 'Deleted'}</td>
+                <td>${item.image_path ? `<img src="/${item.image_path}" width="40">` : ''}</td>
+                <td>${item.quantity}</td>
+                <td>Rs.${item.price}</td>
+                <td>Rs.${item.total}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('editOrderPopup').style.display = 'flex';
+}
+
+function closeEditOrder() {
+    document.getElementById('editOrderPopup').style.display = 'none';
 }
 </script>
 
