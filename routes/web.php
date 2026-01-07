@@ -8,6 +8,7 @@ use App\Http\Controllers\BrandController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\LoginController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -80,7 +81,10 @@ Route::delete('/products/{product}', [ProductController::class, 'destroy'])->nam
 
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
-
+Route::get('/Login', [LoginController::class, 'showLoginForm'])->name('Admin.login');
+Route::post('/admin/login', [LoginController::class, 'login'])->name('admin.login.submit');
+Route::get('/admin/dashboard', [LoginController::class, 'dashboard']);
+Route::get('/admin/logout', [LoginController::class, 'logout']);
 
 
 // Route::get('/dashboard', function () {

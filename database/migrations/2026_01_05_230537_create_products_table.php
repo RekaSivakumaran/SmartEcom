@@ -16,14 +16,20 @@ return new class extends Migration
             $table->unsignedBigInteger('main_category_id');
             $table->unsignedBigInteger('sub_category_id');
             $table->unsignedBigInteger('brand_id');
+            $table->integer('quantity');
 
             $table->string('image')->nullable();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2)->default(0.00);
 
-            $table->enum('discount_type', ['rate', 'amount'])->default('rate');
+          
             $table->decimal('discount_rate', 5, 2)->default(0.00);
             $table->decimal('discount_amount', 10, 2)->default(0.00);
+            $table->enum('status', ['Active', 'Inactive'])->default('Active');
+           
+            $table->enum('discount_type', ['none', 'rate', 'amount'])->default('none');
+
+                  
 
             $table->timestamps();
 

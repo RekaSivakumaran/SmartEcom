@@ -113,6 +113,77 @@
     display: block;
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Modal content */
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 500px;
+    max-height: 80%;
+    overflow-y: auto;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+/* Table styles */
+#orderItemsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+#orderItemsTable th, #orderItemsTable td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+#orderItemsTable th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+}
+
+/* Images in table */
+#orderItemsTable img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+/* Modal footer */
+.modal-footer {
+    margin-top: 15px;
+    text-align: right;
+}
+
+/* Close button */
+.close-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    background-color: #0056b3;
+}
+
 
         /* Responsive */
         @media(max-width: 768px) {
@@ -229,16 +300,14 @@
     </div>
 
 
-    <div id="orderItemsPopup" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-    background: rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
-    
-    <div style="background:#fff; padding:20px; width:80%; max-height:80%; overflow-y:auto; margin:auto; border-radius:5px;">
-        <h3>Order Items</h3>
-        <table border="1" cellpadding="5" cellspacing="0" id="orderItemsTable" style="width:100%;">
+    <div id="orderItemsPopup" class="modal">
+    <div class="modal-content">
+        <h3>View Products</h3>
+        <table id="orderItemsTable">
             <thead>
                 <tr>
-                    <th>Product Name</th>
                     <th>Image</th>
+                    <th>Product Name</th>
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
@@ -246,8 +315,8 @@
             </thead>
             <tbody></tbody>
         </table>
-        <div style="text-align:right; margin-top:10px;">
-            <button onclick="closeOrderItems()">Close</button>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeOrderItems()">CLOSE</button>
         </div>
     </div>
 </div>
@@ -256,34 +325,30 @@
     const orders = @json($orders);
 
     function openOrderItems(orderId){
-        const order = orders.find(o => o.id === orderId);
-        if(!order) return;
+    const order = orders.find(o => o.id === orderId);
+    if(!order) return;
 
-        const tbody = document.querySelector('#orderItemsTable tbody');
-        tbody.innerHTML = '';
+    const tbody = document.querySelector('#orderItemsTable tbody');
+    tbody.innerHTML = '';
 
-        order.items.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${item.product ? item.product.name : 'Deleted Product'}</td>
-                <td>${item.image_path ? `<img src="/${item.image_path}" width="50" />` : 'No Image'}</td>
-                <td>${item.quantity}</td>
-                <td>Rs.${parseFloat(item.price).toFixed(2)}</td>
-                <td>Rs.${parseFloat(item.total).toFixed(2)}</td>
-            `;
-            tbody.appendChild(tr);
-        });
+    order.items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.image_path ? `<img src="/${item.image_path}" />` : 'No Image'}</td>
+            <td>${item.product ? item.product.name : 'Deleted Product'}</td>
+            <td>${item.quantity}</td>
+            <td>Rs.${parseFloat(item.price).toFixed(2)}</td>
+            <td>Rs.${parseFloat(item.total).toFixed(2)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 
-        // Show popup
-        const popup = document.getElementById('orderItemsPopup');
-        popup.style.display = 'flex';
-        popup.style.justifyContent = 'center';
-        popup.style.alignItems = 'center';
-    }
+    document.getElementById('orderItemsPopup').style.display = 'flex';
+}
 
-    function closeOrderItems(){
-        document.getElementById('orderItemsPopup').style.display = 'none';
-    }
+function closeOrderItems(){
+    document.getElementById('orderItemsPopup').style.display = 'none';
+}
 </script>
 
 
