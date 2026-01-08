@@ -56,42 +56,22 @@
 
 <!-- Start Categories  -->
     <div class="categories-shop">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/t-shirts-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">T-shirts</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/shirt-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">Shirt</a>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/wallet-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">Wallet</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/women-bag-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">Bags</a>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/shoes-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">Shoes</a>
-                    </div>
-                    <div class="shop-cat-box">
-                        <img class="img-fluid" src="{{ asset('image/women-shoes-img.jpg') }}" alt="" />
-                        <a class="btn hvr-hover" href="#">Women Shoes</a>
-                    </div>
+    <div class="container">
+        <div class="row">
+            @foreach($departments as $department)
+            <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                <div class="shop-dep-box">
+                    <img class="img-fluid" 
+                         src="{{ asset($department->imagepath) }}" 
+                         alt="{{ $department->Maincategoryname }}" />
+                    <a class="btn hvr-hover" href="#">{{ $department->Maincategoryname }}</a>
                 </div>
             </div>
+            @endforeach
         </div>
     </div>
-    <!-- End Categories -->
+</div>
+
 
     <!-- Start Products  -->
     <div class="products-box">
@@ -104,111 +84,107 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+
+             <div class="row">
                 <div class="col-lg-12">
                     <div class="special-menu text-center">
                         <div class="button-group filter-button-group">
-                            <button class="active" data-filter="*">All</button>
-                            <button data-filter=".top-featured">Top featured</button>
-                            <button data-filter=".best-seller">Best seller</button>
-                        </div>
+    <button class="active" data-filter="*">All</button>
+    <button data-filter=".top-featured">Top featured</button>
+    <button data-filter=".best-seller">Best seller</button>
+</div>
+
                     </div>
                 </div>
             </div>
+           <!-- Products Section -->
+<div class="row special-list">
+    @foreach($products as $product)
+        @php
+            $classes = '';
+            if($product->created_at >= \Carbon\Carbon::now()->subDays(7)) {
+                $classes .= ' top-featured';
+            }
+            if($product->discount_amount > 0 || $product->discount_rate > 0) {
+                $classes .= ' best-seller';
+            }
+        @endphp
 
-            <div class="row special-list">
-                <div class="col-lg-3 col-md-6 special-grid best-seller">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="{{ asset('image/img-pro-01.jpg') }}" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>T-Shirt-Black Men's Premium Long Sleeve</h4>
-                            <h5> RS.4700</h5>
-                        </div>
+        <div class="col-lg-3 col-md-6 special-grid{{ $classes }}">
+            <div class="products-single fix">
+                <div class="box-img-hover">
+                    @if($product->discount_amount > 0 || $product->discount_rate > 0)
+                        <div class="type-lb"><p class="sale">Sale</p></div>
+                    @elseif($product->created_at >= \Carbon\Carbon::now()->subDays(7))
+                        <div class="type-lb"><p class="new">New</p></div>
+                    @endif
+
+                    <img src="{{ asset($product->image) }}" class="img-fluid" alt="{{ $product->name }}">
+                    <div class="mask-icon">
+                        <ul>
+                            <li>
+                                <a href="{{ route('Client.shopdetails', $product->id) }}" title="View">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </li>
+
+                            <!-- <li><a href="#" title="View"><i class="fas fa-eye"></i></a></li> -->
+                            <li><a href="#" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
+                            <li><a href="#" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
+                        </ul>
+                        <a class="cart" href="#">Add to Cart</a>
                     </div>
                 </div>
+                <div class="why-text">
+                    <h4>{{ $product->name }}</h4>
+                   @php
+    // Calculate final price
+    if($product->discount_rate > 0) {
+        $finalPrice = $product->price - ($product->price * $product->discount_rate / 100);
+    } elseif($product->discount_amount > 0) {
+        $finalPrice = $product->price - $product->discount_amount;
+    } else {
+        $finalPrice = $product->price;
+    }
+@endphp
 
-                <div class="col-lg-3 col-md-6 special-grid top-featured">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="new">New</p>
-                            </div>
-                            <img src="{{ asset('image/img-pro-02.jpg') }}" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Ladies Girl Fashion Crop Baggy Black White Tops</h4>
-                            <h5> Rs.2300</h5>
-                        </div>
-                    </div>
-                </div>
+@php
+    // Calculate final price
+    if($product->discount_rate > 0) {
+        $finalPrice = $product->price - ($product->price * $product->discount_rate / 100);
+        $displayRate = $product->discount_rate;
+    } elseif($product->discount_amount > 0) {
+        $finalPrice = $product->price - $product->discount_amount;
+        // calculate discount rate from amount
+        $displayRate = ($product->discount_amount / $product->price) * 100;
+    } else {
+        $finalPrice = $product->price;
+        $displayRate = 0;
+    }
+@endphp
 
-                <div class="col-lg-3 col-md-6 special-grid top-featured">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="{{ asset('image/img-pro-03.jpg') }}" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Women Leather Handbags Bags for Women Sac Bag</h4>
-                            <h5> Rs.3590</h5>
-                        </div>
-                    </div>
-                </div>
+<h5>
+    Rs.{{ number_format($finalPrice, 2) }}
+    @if($product->discount_amount > 0 || $product->discount_rate > 0)
+        
+        <del style="color: gray; font-size: 0.6em;">
+            Rs.{{ number_format($product->price, 2) }}
+        </del>
+        <small style="color: gray; font-size: 0.6em;">
+            - {{ number_format($displayRate, 0) }}%
+        </small>
+    @endif
+</h5>
 
-                <div class="col-lg-3 col-md-6 special-grid best-seller">
-                    <div class="products-single fix">
-                        <div class="box-img-hover">
-                            <div class="type-lb">
-                                <p class="sale">Sale</p>
-                            </div>
-                            <img src="{{ asset('image/img-pro-04.jpg') }}" class="img-fluid" alt="Image">
-                            <div class="mask-icon">
-                                <ul>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                                    <li><a href="#" data-toggle="tooltip" data-placement="right" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
-                                </ul>
-                                <a class="cart" href="#">Add to Cart</a>
-                            </div>
-                        </div>
-                        <div class="why-text">
-                            <h4>Quartz Analog Business Chain Casual Wrist Dial Watches</h4>
-                            <h5> Rs.4000</h5>
-                        </div>
-                    </div>
+
+
+                    <!-- <h5> Rs.{{ $product->price - $product->discount_amount }}</h5> -->
                 </div>
             </div>
+        </div>
+    @endforeach
+</div>
+
         </div>
     </div>
     <!-- End Products  -->
@@ -286,6 +262,34 @@
         </div>
     </div>
     <!-- End Blog  -->
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.filter-button-group button');
+        const items = document.querySelectorAll('.special-list .special-grid');
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons
+                buttons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter'); // *, .top-featured, .best-seller
+
+                items.forEach(item => {
+                    if(filter === '*' || item.classList.contains(filter.replace('.', ''))) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
 
     @endsection
 

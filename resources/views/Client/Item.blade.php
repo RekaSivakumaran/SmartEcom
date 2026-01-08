@@ -25,47 +25,51 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-3 col-sm-12 col-xs-12 sidebar-shop-left">
                     <div class="product-categori">
+
                         <div class="search-product">
                             <form action="#">
                                 <input class="form-control" placeholder="Search here..." type="text">
                                 <button type="submit"> <i class="fa fa-search"></i> </button>
                             </form>
                         </div>
-                        <div class="filter-sidebar-left">
-                            <div class="title-left">
-                                <h3>Categories</h3>
-                            </div>
-                            <div class="list-group list-group-collapse list-group-sm list-group-tree" id="list-group-men" data-children=".sub-men">
-                                <div class="list-group-collapse sub-men">
-                                    <a class="list-group-item list-group-item-action" href="#sub-men1" data-toggle="collapse" aria-expanded="true" aria-controls="sub-men1">Clothing <small class="text-muted">(100)</small>
-								</a>
-                                    <div class="collapse show" id="sub-men1" data-parent="#list-group-men">
-                                        <div class="list-group">
-                                            <a href="#" class="list-group-item list-group-item-action active">T-Shirts <small class="text-muted">(50)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">Polo T-Shirts <small class="text-muted">(10)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">Round Neck T-Shirts <small class="text-muted">(10)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">V Neck T-Shirts <small class="text-muted">(10)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">Hooded T-Shirts <small class="text-muted">(20)</small></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="list-group-collapse sub-men">
-                                    <a class="list-group-item list-group-item-action" href="#sub-men2" data-toggle="collapse" aria-expanded="false" aria-controls="sub-men2">Footwear 
-								<small class="text-muted">(50)</small>
-								</a>
-                                    <div class="collapse" id="sub-men2" data-parent="#list-group-men">
-                                        <div class="list-group">
-                                            <a href="#" class="list-group-item list-group-item-action">Sports Shoes <small class="text-muted">(10)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">Sneakers <small class="text-muted">(20)</small></a>
-                                            <a href="#" class="list-group-item list-group-item-action">Formal Shoes <small class="text-muted">(20)</small></a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <a href="#" class="list-group-item list-group-item-action"> Men  <small class="text-muted">(150) </small></a>
-                                <a href="#" class="list-group-item list-group-item-action">Accessories <small class="text-muted">(11)</small></a>
-                                <a href="#" class="list-group-item list-group-item-action">Bags <small class="text-muted">(22)</small></a>
-                            </div>
-                        </div>
+
+
+             <div class="filter-sidebar-left">
+    <div class="title-left">
+        <h3>Categories</h3>
+    </div>
+
+    <div class="list-group list-group-collapse list-group-sm list-group-tree" id="list-group-men">
+
+        @foreach($categories as $index => $main)
+            <div class="list-group-collapse sub-men">
+                <a class="list-group-item list-group-item-action"
+                   href="#sub-men{{ $index }}"
+                   data-toggle="collapse">
+                    {{ $main->Maincategoryname }}
+                    <small class="text-muted">({{ $main->subCategories->count() }})</small>
+                </a>
+
+                @if($main->subCategories->count())
+                <div class="collapse" id="sub-men{{ $index }}">
+                    <div class="list-group">
+                        @foreach($main->subCategories as $sub)
+                            <a href="{{ route('products.bySubCategory', $sub->id) }}"
+                               class="list-group-item list-group-item-action">
+                                {{ $sub->sub_category_name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+            </div>
+        @endforeach
+
+    </div>
+</div>
+
+
+
                         <div class="filter-price-left">
                             <div class="title-left">
                                 <h3>Price</h3>
@@ -150,6 +154,9 @@
 
                     </div>
                 </div>
+
+
+
                 <div class="col-xl-9 col-lg-9 col-sm-12 col-xs-12 shop-content-right">
                     <div class="right-product-box">
                         <div class="product-item-filter row">
@@ -178,9 +185,14 @@
                             </div>
                         </div>
 
+
+
+
                         <div class="row product-categorie-box">
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane fade show active" id="grid-view">
+                                   
+                                    
                                     <div class="row">
                                         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
                                             <div class="products-single fix">
@@ -358,6 +370,9 @@
                                                 </div>
                                             </div>
                                         </div>
+
+
+                                        
                                         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
                                             <div class="products-single fix">
                                                 <div class="box-img-hover">
@@ -382,6 +397,48 @@
                                         </div>
                                     </div>
                                 </div>
+
+
+
+<!-- 
+                                <div class="row">
+
+    @forelse($products as $product)
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+
+                <img src="{{ asset('storage/products/'.$product->image) }}"
+                     class="card-img-top" alt="{{ $product->name }}">
+
+                <div class="card-body">
+                    <h5>{{ $product->name }}</h5>
+
+                    <h6>
+                        Rs. {{ number_format($product->price - $product->discount_amount, 2) }}
+                        @if($product->discount_amount > 0)
+                            <br>
+                            <small style="color:gray;">
+                                <del>Rs. {{ number_format($product->price, 2) }}</del>
+                            </small>
+                        @endif
+                    </h6>
+
+                    @if($product->quantity == 0)
+                        <span class="badge badge-danger">Sold Out</span>
+                    @else
+                        <span class="badge badge-success">In Stock</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @empty
+        <p class="text-center">No products found</p>
+    @endforelse
+
+</div> -->
+
+
+
                                 <div role="tabpanel" class="tab-pane fade" id="list-view">
                                     <div class="list-view-box">
                                         <div class="row">

@@ -14,4 +14,9 @@ class MainCategoryModel extends Model
         'status',
         'imagepath',
     ];
+
+     public function subCategories()
+    {
+        return $this->hasMany(SubCategoryModel::class, 'main_category_id');
+    }
 }

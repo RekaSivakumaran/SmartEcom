@@ -117,13 +117,13 @@
 
 .modal-content {
     background: #ffffff;
-    width: 650px;       /* wider popup */
+    width: 650px;        
     max-width: 95%;
     border-radius: 14px;
     padding: 20px 24px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     animation: popupFade 0.25s ease;
-    max-height: 85vh;   /* shorter height */
+    max-height: 97vh;    
     overflow-y: auto;
 }
 
@@ -209,6 +209,23 @@
     margin-top: 2px;
     display: block;
 }
+
+.textarea-large {
+    min-height: 60px;   /* increase height */
+    resize: vertical;    /* allow resize */
+    width: 100%;  
+}
+
+.textarea-large:focus {
+    outline: none;
+    border-color: #17a2b8;
+    box-shadow: 0 0 6px rgba(23,162,184,0.35);
+}
+
+.textarea-large {
+    overflow: hidden;
+}
+
 
 
         /* Responsive */
@@ -456,14 +473,25 @@
                 </div>
             </div>
 
-            <!-- Row 6: Image -->
-            <div class="form-group">
+            <div class="form-row">
+                <div class="form-group">
                 <label>Item Image</label>
                 <input type="file" name="image">
                 @error('image')
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
+                  <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="description" class="form-control textarea-large" rows="4">{{ old('description') }}</textarea>
+                @error('description')
+                    <span class="text-danger" style="font-size: 13px;">{{ $message }}</span>
+                @enderror
+            </div>
+            </div>
+
+            <!-- Row 6: Image -->
+           
 
             <!-- Footer -->
             <div class="modal-footer">
@@ -612,6 +640,7 @@ function openAddItemPopup() {
     form.querySelector('select[name="brand_id"]').value = product.brand_id ?? '';
 
     document.getElementById('main_category_id').value = product.main_category_id;
+    document.getElementById('description').value = product.description;
 
     const subSelect = document.getElementById('sub_category_id');
     subSelect.innerHTML = '<option value="">Select Sub Category</option>';

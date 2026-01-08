@@ -48,7 +48,11 @@ class ProductController extends Controller
     $product->discount_type = $request->discount_type;
     $product->discount_rate = $request->discount_rate ?? 0;
     $product->discount_amount = $request->discount_amount ?? 0;
+    $product->description = $request->description;   
     $product->status = $request->status;
+
+
+
 
     // Handle Image Upload
     if($request->hasFile('image')){
@@ -107,6 +111,7 @@ public function update(Request $request, $id)
     $product->discount_type = $request->discount_type;
     $product->discount_rate = $request->discount_rate ?? 0;
     $product->discount_amount = $request->discount_amount ?? 0;
+    $product->description = $request->description;   
     $product->status = $request->status;
 
     // Handle Image Upload (optional)

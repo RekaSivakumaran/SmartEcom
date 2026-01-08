@@ -9,6 +9,7 @@ use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ClientController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -106,3 +107,16 @@ Route::get('/client/about', function () {
 Route::get('/client/contactus', function () {
     return view('Client.contactus');   
 })->name('contactus');
+
+Route::get('/client/Item', function () {
+    return view('Client.Item');   
+})->name('Item');
+
+Route::get('/client', [ClientController::class, 'index'])->name('home');
+Route::get('/product/{id}', [ClientController::class, 'show'])->name('Client.shopdetails');
+Route::get('/client/Item', [ClientController::class, 'showCategories'])
+    ->name('Item');
+
+Route::get('/products/subcategory/{id}', 
+    [ClientController::class, 'productsBySubCategory']
+)->name('products.bySubCategory');

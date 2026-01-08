@@ -303,6 +303,14 @@
     display: block;
 }
 
+.desc {
+    max-width: 250px;        /* control width */
+    white-space: normal;     /* allow next line */
+    word-wrap: break-word;   /* break long words */
+    line-height: 1.5;
+}
+
+
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 420px) {
@@ -366,7 +374,8 @@
                         @endif
                     </td>
                     <td>{{ $category->Maincategoryname }}</td>
-                    <td>{{ $category->description }}</td>
+                    <td class="desc">{{ $category->description }}</td>
+
                     <td>{{ $category->status }}</td>
                     <td>
                         <button class="action-btn view-btn" onclick="openEditPopup(

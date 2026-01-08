@@ -302,6 +302,13 @@
     margin-top: 2px;
     display: block;
 }
+.desc {
+    max-width: 200px;        /* control width */
+    white-space: normal;     /* allow next line */
+    word-wrap: break-word;   /* break long words */
+    line-height: 1.5;
+}
+
 
 
 /* ===== RESPONSIVE ===== */
@@ -374,7 +381,8 @@
 </td>
     </td>
     <td>{{ $subcategory->sub_category_name }}</td>
-    <td>{{ $subcategory->description }}</td>
+        <td class="desc">{{ $subcategory->description }}</td>
+
     <td>{{ $subcategory->mainCategory->Maincategoryname ?? 'N/A' }}</td>
     <td>{{ $subcategory->status }}</td>
       <td>
