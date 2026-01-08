@@ -27,7 +27,7 @@
                 <div class="col-lg-4 col-sm-12">
                     <div class="contact-info-left">
                         <h2>CONTACT INFO</h2>
-<p>
+    <p>
         SMartEcom is committed to providing the best online shopping experience. 
         For any queries or support, feel free to reach out to us through the following contact details. 
         Our team is always ready to assist you with product information, orders, or any other inquiries.
@@ -47,9 +47,9 @@
                 <div class="col-lg-8 col-sm-12">
                     <div class="contact-form-right">
                         <h2>GET IN TOUCH</h2>
-<p>
-SMartEcom is a smart e-commerce platform offering quality products, fast delivery, and secure payments for a seamless shopping experience.
-</p>
+    <p>
+        SMartEcom is a smart e-commerce platform offering quality products, fast delivery, and secure payments for a seamless shopping experience.
+    </p>
                         <form id="contactForm">
                             <div class="row">
                                 <div class="col-md-12">
