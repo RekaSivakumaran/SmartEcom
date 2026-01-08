@@ -27,16 +27,19 @@
                 <div class="col-lg-4 col-sm-12">
                     <div class="contact-info-left">
                         <h2>CONTACT INFO</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent urna diam, maximus ut ullamcorper quis, placerat id eros. Duis semper justo sed condimentum rutrum. Nunc tristique purus turpis. Maecenas vulputate. </p>
-                        <ul>
+<p>
+        SMartEcom is committed to providing the best online shopping experience. 
+        For any queries or support, feel free to reach out to us through the following contact details. 
+        Our team is always ready to assist you with product information, orders, or any other inquiries.
+    </p>                        <ul>
                             <li>
-                                <p><i class="fas fa-map-marker-alt"></i>Address: Michael I. Days 3756 <br>Preston Street Wichita,<br> KS 67213 </p>
+                                <p><i class="fas fa-map-marker-alt"></i>Address: 123 Main Street, <br>Jaffna<br> Sri Lanka </p>
                             </li>
                             <li>
-                                <p><i class="fas fa-phone-square"></i>Phone: <a href="tel:+1-888705770">+1-888 705 770</a></p>
+                                <p><i class="fas fa-phone-square"></i>Phone: +94-123456789</p>
                             </li>
                             <li>
-                                <p><i class="fas fa-envelope"></i>Email: <a href="mailto:contactinfo@gmail.com">contactinfo@gmail.com</a></p>
+                                <p><i class="fas fa-envelope"></i>Email: info@smartecom.com</p>
                             </li>
                         </ul>
                     </div>
@@ -44,7 +47,9 @@
                 <div class="col-lg-8 col-sm-12">
                     <div class="contact-form-right">
                         <h2>GET IN TOUCH</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed odio justo, ultrices ac nisl sed, lobortis porta elit. Fusce in metus ac ex venenatis ultricies at cursus mauris.</p>
+<p>
+SMartEcom is a smart e-commerce platform offering quality products, fast delivery, and secure payments for a seamless shopping experience.
+</p>
                         <form id="contactForm">
                             <div class="row">
                                 <div class="col-md-12">

@@ -531,12 +531,12 @@ window.addEventListener('DOMContentLoaded', (event) => {
 <script>
 
 function openPopup() {
-    const form = document.getElementById('categoryForm'); // ✅ fixed
+    const form = document.getElementById('categoryForm');
 
     document.getElementById('modalTitle').innerText = 'Add Sub Category';
     document.getElementById('saveBtn').innerText = 'Save';
 
-    form.action = "{{ route('subcategories.store') }}"; // update route if needed
+    form.action = "{{ route('subcategories.store') }}"; 
     form.reset();
 
     const hiddenId = document.getElementById('category_id');
