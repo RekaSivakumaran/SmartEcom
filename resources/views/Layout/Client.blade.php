@@ -123,9 +123,10 @@
                             <a class="nav-link" href="{{ route('about') }}">About Us</a>
                         </li>
 
-                         <li class="nav-item {{ request()->routeIs('Item') || request()->is('client/Item') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ route('Item') }}">Product</a>
-                        </li>
+                       <li class="nav-item {{ request()->routeIs('products.*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('products.all') }}">Product</a>
+</li>
+
 
 
 
@@ -405,6 +406,8 @@
 
 
     <!-- ALL JS FILES -->
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="js/jquery-3.2.1.min.js"></script>
     <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.min.js"></script>

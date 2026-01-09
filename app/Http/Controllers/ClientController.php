@@ -42,33 +42,32 @@ class ClientController extends Controller
 
 
    public function showCategories()
-    {
-        $categories = MainCategoryModel::with([
-            'subCategories' => function ($q) {
-                $q->where('status', 'Active');
-            }
-        ])->where('status', 'Active')->get();
+{
+    $categories = MainCategoryModel::with([
+        'subCategories' => function ($q) {
+            $q->where('status', 'Active');
+        }
+    ])->where('status', 'Active')->get();
 
-        $products = ProductModel::where('status', 'Active')->get();
+    $products = ProductModel::where('status', 'Active')->get();
 
-        return view('Client.Item', compact('categories', 'products'));
-    }
+    return view('Client.Item', compact('categories', 'products'));
+}
 
-    // ✅ Sub category click – filtered products
-    public function productsBySubCategory($id)
-    {
-        $categories = MainCategoryModel::with([
-            'subCategories' => function ($q) {
-                $q->where('status', 'Active');
-            }
-        ])->where('status', 'Active')->get();
+public function productsBySubCategory($id)
+{
+    $categories = MainCategoryModel::with([
+        'subCategories' => function ($q) {
+            $q->where('status', 'Active');
+        }
+    ])->where('status', 'Active')->get();
 
-        $products = ProductModel::where('sub_category_id', $id)
-            ->where('status', 'Active')
-            ->get();
+    $products = ProductModel::where('sub_category_id', $id)
+        ->where('status', 'Active')
+        ->get();
 
-        return view('Client.Item', compact('categories', 'products'));
-    }
+    return view('Client.Item', compact('categories', 'products'));
+}
 
 
 

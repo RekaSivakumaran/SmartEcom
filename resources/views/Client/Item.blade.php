@@ -33,40 +33,52 @@
                             </form>
                         </div>
 
-
-             <div class="filter-sidebar-left">
+<div class="filter-sidebar-left">
     <div class="title-left">
         <h3>Categories</h3>
     </div>
 
-    <div class="list-group list-group-collapse list-group-sm list-group-tree" id="list-group-men">
+    <div class="list-group list-group-sm" id="categoryAccordion">
 
-        @foreach($categories as $index => $main)
-            <div class="list-group-collapse sub-men">
-                <a class="list-group-item list-group-item-action"
-                   href="#sub-men{{ $index }}"
-                   data-toggle="collapse">
-                    {{ $main->Maincategoryname }}
-                    <small class="text-muted">({{ $main->subCategories->count() }})</small>
-                </a>
+        <!-- ALL -->
+        <a href="{{ route('products.all') }}"
+           class="list-group-item list-group-item-action fw-bold">
+            All
+        </a>
 
-                @if($main->subCategories->count())
-                <div class="collapse" id="sub-men{{ $index }}">
-                    <div class="list-group">
-                        @foreach($main->subCategories as $sub)
-                            <a href="{{ route('products.bySubCategory', $sub->id) }}"
-                               class="list-group-item list-group-item-action">
-                                {{ $sub->sub_category_name }}
-                            </a>
-                        @endforeach
-                    </div>
+        @foreach($categories as $main)
+            <!-- MAIN CATEGORY -->
+            <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+               data-bs-toggle="collapse"
+               href="#subCategory{{ $main->id }}"
+               role="button"
+               aria-expanded="false"
+               aria-controls="subCategory{{ $main->id }}">
+                {{ $main->Maincategoryname }}
+                <span class="badge bg-secondary">
+                    {{ $main->subCategories->count() }}
+                </span>
+            </a>
+
+            <!-- SUB CATEGORY -->
+            <div class="collapse"
+                 id="subCategory{{ $main->id }}"
+                 data-bs-parent="#categoryAccordion">
+                <div class="list-group ms-3">
+                    @foreach($main->subCategories as $sub)
+                        <a href="{{ route('products.bySubCategory', $sub->id) }}"
+                           class="list-group-item list-group-item-action">
+                            {{ $sub->sub_category_name }}
+                        </a>
+                    @endforeach
                 </div>
-                @endif
             </div>
         @endforeach
 
     </div>
 </div>
+
+
 
 
 
@@ -370,8 +382,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
                                         
                                         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
                                             <div class="products-single fix">

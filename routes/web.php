@@ -114,9 +114,17 @@ Route::get('/client/Item', function () {
 
 Route::get('/client', [ClientController::class, 'index'])->name('home');
 Route::get('/product/{id}', [ClientController::class, 'show'])->name('Client.shopdetails');
-Route::get('/client/Item', [ClientController::class, 'showCategories'])
-    ->name('Item');
+// Route::get('/client/Item', [ClientController::class, 'showCategories'])
+//     ->name('Item');
 
-Route::get('/products/subcategory/{id}', 
-    [ClientController::class, 'productsBySubCategory']
-)->name('products.bySubCategory');
+// Route::get('/products/subcategory/{id}', 
+//     [ClientController::class, 'productsBySubCategory']
+// )->name('products.bySubCategory');
+
+// ALL PRODUCTS
+Route::get('/products', [ClientController::class, 'showCategories'])
+    ->name('products.all');
+
+// PRODUCTS BY SUB CATEGORY
+Route::get('/products/subcategory/{id}', [ClientController::class, 'productsBySubCategory'])
+    ->name('products.bySubCategory');
