@@ -42,17 +42,21 @@ class ClientController extends Controller
 
 
    public function showCategories()
-{
-    $categories = MainCategoryModel::with([
-        'subCategories' => function ($q) {
-            $q->where('status', 'Active');
-        }
-    ])->where('status', 'Active')->get();
+   {
+   $categories = MainCategoryModel::where('status', 'Active')
+    ->whereHas('subCategories', function ($q) {
+        $q->where('status', 'Active');
+    })
+    ->with(['subCategories' => function ($q) {
+        $q->where('status', 'Active');
+    }])
+    ->get();
+
 
     $products = ProductModel::where('status', 'Active')->get();
 
     return view('Client.Item', compact('categories', 'products'));
-}
+  }
 
 public function productsBySubCategory($id)
 {
