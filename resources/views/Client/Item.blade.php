@@ -232,7 +232,48 @@
                                 </p>
                             </div>
                         </div>
-                        <div class="filter-brand-left">
+
+
+<div class="filter-brand-left">
+    <div class="title-left">
+        <h3>Brand</h3>
+    </div>
+    <div class="brand-box">
+        <ul>
+            @php
+                
+                $brandWithProducts = $products->pluck('brand_id')->unique();
+            @endphp
+
+            @foreach($brands as $brand)
+                @if($brandWithProducts->contains($brand->id))
+                <li>
+                    <div class="radio radio-danger">
+                        <input type="radio"
+                               name="brand_filter"
+                               class="brand-filter"
+                               data-brand-id="{{ $brand->id }}">
+                        <label>{{ $brand->brandname }}</label>
+                    </div>
+                </li>
+                @endif
+            @endforeach
+
+            <li>
+                <button id="clearBrand" style="color:#fff;" class="btn hvr-hover mt-2">Clear</button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+                        <!-- <div class="filter-brand-left">
                             <div class="title-left">
                                 <h3>Brand</h3>
                             </div>
@@ -300,7 +341,7 @@
                                     </li>
                                 </ul>
                             </div>
-                        </div>
+                        </div> -->
 
                     </div>
                 </div>
@@ -379,7 +420,7 @@
                                         
                                          
                                     </div> -->
-<div class="row g-3">
+<div class="row g-3" id="grid-view">
 @forelse($products as $product)
     @php
         // Calculate final price
@@ -395,8 +436,8 @@
         }
     @endphp
 
-    <div class="col-sm-6 col-md-4 col-lg-4">
-        <div class="product-card">
+    <div class="col-sm-6 col-md-4 col-lg-4" data-brand-id="{{ $product->brand_id }}">
+        <div class="product-card" >
 
             <div class="image-box">
                 <img src="{{ asset($product->image) }}" alt="{{ $product->name }}">
@@ -446,7 +487,7 @@
                                 </div>
 
                                 <div role="tabpanel" class="tab-pane fade" id="list-view">
-                                    <div class="list-view-box">
+                                    <div class="list-view-box" id="list-view">
 @forelse($products as $product)
 
     @php
@@ -463,7 +504,7 @@
         }
     @endphp
 
-    <div class="row mb-4">
+    <div class="row mb-4" data-brand-id="{{ $product->brand_id }}">
         
         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
             <div class="products-single fix">
@@ -540,4 +581,51 @@
         </div>
     </div>
     <!-- End Shop Page -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const brandRadios = document.querySelectorAll(".brand-filter");
+
+    // Grid + List view products select பண்ணுது
+    const productItems = document.querySelectorAll(
+        "#grid-view > div.col-sm-6, #grid-view > div.col-md-4, #grid-view > div.col-lg-4, #list-view > .row.mb-4"
+    );
+
+    brandRadios.forEach(radio => {
+        radio.addEventListener("change", function() {
+            const brandId = this.dataset.brandId;
+
+            productItems.forEach(item => {
+                if(item.dataset.brandId === brandId) {
+                    // Grid column
+                    if(item.classList.contains('col-sm-6') || item.classList.contains('col-md-4') || item.classList.contains('col-lg-4')){
+                        item.style.display = "block";
+                    } else {
+                        // List view row
+                        item.style.display = "flex";
+                    }
+                } else {
+                    item.style.display = "none";
+                }
+            });
+        });
+    });
+
+    // Clear button
+    document.getElementById("clearBrand").addEventListener("click", function() {
+        productItems.forEach(item => {
+            if(item.classList.contains('col-sm-6') || item.classList.contains('col-md-4') || item.classList.contains('col-lg-4')){
+                item.style.display = "block"; // grid
+            } else {
+                item.style.display = "flex"; // list
+            }
+        });
+        brandRadios.forEach(r => r.checked = false);
+    });
+
+});
+</script>
+
+
 @endsection

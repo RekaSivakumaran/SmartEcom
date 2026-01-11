@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MainCategoryModel;
 use App\Models\ProductModel;
+use App\Models\BrandModel;
 use Carbon\Carbon;
 
 class ClientController extends Controller
@@ -38,41 +39,84 @@ class ClientController extends Controller
         return view('Client.shopdetails', compact('product'));
     }
 
+
+    public function showCategories(Request $request)
+{
+    $categories = MainCategoryModel::where('status', 'Active')
+        ->whereHas('subCategories', fn ($q) => $q->where('status', 'Active'))
+        ->with(['subCategories' => fn ($q) => $q->where('status', 'Active')])
+        ->get();
+
+    // Only brands that have active products
+    $brands = BrandModel::whereHas('products', function ($q) {
+        $q->where('status', 'Active');
+    })->get();
+
+    $products = ProductModel::where('status', 'Active')
+        ->when($request->brand, fn ($q) =>
+            $q->where('brand_id', $request->brand)
+        )
+        ->get();
+
+    return view('Client.Item', compact('categories', 'brands', 'products'));
+}
+
     
 
 
-   public function showCategories()
-   {
-   $categories = MainCategoryModel::where('status', 'Active')
-    ->whereHas('subCategories', function ($q) {
-        $q->where('status', 'Active');
-    })
-    ->with(['subCategories' => function ($q) {
-        $q->where('status', 'Active');
-    }])
-    ->get();
+//    public function showCategories()
+//    {
+//    $categories = MainCategoryModel::where('status', 'Active')
+//     ->whereHas('subCategories', function ($q) {
+//         $q->where('status', 'Active');
+//     })
+//     ->with(['subCategories' => function ($q) {
+//         $q->where('status', 'Active');
+//     }])
+//     ->get();
 
 
-    $products = ProductModel::where('status', 'Active')->get();
+//     $products = ProductModel::where('status', 'Active')->get();
 
-    return view('Client.Item', compact('categories', 'products'));
-  }
+//     return view('Client.Item', compact('categories', 'products'));
+// }
 
-public function productsBySubCategory($id)
+// public function productsBySubCategory($id)
+// {
+//     $categories = MainCategoryModel::with([
+//         'subCategories' => function ($q) {
+//             $q->where('status', 'Active');
+//         }
+//     ])->where('status', 'Active')->get();
+
+//     $products = ProductModel::where('sub_category_id', $id)
+//         ->where('status', 'Active')
+//         ->get();
+
+//     return view('Client.Item', compact('categories', 'products'));
+// }
+
+public function productsBySubCategory(Request $request, $id)
 {
-    $categories = MainCategoryModel::with([
-        'subCategories' => function ($q) {
-            $q->where('status', 'Active');
-        }
-    ])->where('status', 'Active')->get();
+    $categories = MainCategoryModel::where('status', 'Active')
+        ->with(['subCategories' => fn ($q) => $q->where('status', 'Active')])
+        ->get();
+
+    // Brands that have products in this sub category
+    $brands = BrandModel::whereHas('products', function ($q) use ($id) {
+        $q->where('status', 'Active')
+          ->where('sub_category_id', $id);
+    })->get();
 
     $products = ProductModel::where('sub_category_id', $id)
         ->where('status', 'Active')
+        ->when($request->brand, fn ($q) =>
+            $q->where('brand_id', $request->brand)
+        )
         ->get();
 
-    return view('Client.Item', compact('categories', 'products'));
+    return view('Client.Item', compact('categories', 'brands', 'products'));
 }
-
 
 
      
