@@ -41,25 +41,19 @@ class ClientController extends Controller
 
 
     public function showCategories(Request $request)
-{
-    $categories = MainCategoryModel::where('status', 'Active')
-        ->whereHas('subCategories', fn ($q) => $q->where('status', 'Active'))
-        ->with(['subCategories' => fn ($q) => $q->where('status', 'Active')])
-        ->get();
+    { 
+        $categories = MainCategoryModel::where('status', 'Active') 
+        ->whereHas('subCategories', fn ($q) => $q->where('status', 'Active')) 
+        ->with(['subCategories' => fn ($q) => $q->where('status', 'Active')]) ->get();
 
-    // Only brands that have active products
-    $brands = BrandModel::whereHas('products', function ($q) {
-        $q->where('status', 'Active');
-    })->get();
+        $brands = BrandModel::whereHas('products', function ($q) 
+        { $q->where('status', 'Active'); })->get();
 
-    $products = ProductModel::where('status', 'Active')
-        ->when($request->brand, fn ($q) =>
-            $q->where('brand_id', $request->brand)
-        )
-        ->get();
+        $products = ProductModel::where('status', 'Active') ->when($request->brand, fn ($q) => $q->where('brand_id', $request->brand) ) 
+        ->get(); 
 
-    return view('Client.Item', compact('categories', 'brands', 'products'));
-}
+        return view('Client.Item', compact('categories', 'brands', 'products'));
+    }
 
     
 

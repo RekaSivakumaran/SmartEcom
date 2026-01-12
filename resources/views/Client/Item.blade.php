@@ -139,6 +139,88 @@
     font-weight: 600;
 }
 
+
+.custom-slider-container{
+    position: relative;
+    padding: 25px 0;
+}
+
+/* RANGE INPUTS */
+.custom-slider-container input[type=range]{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* THUMBS */
+.custom-slider-container input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    pointer-events: all;
+    width: 18px;
+    height: 18px;
+    background: #d33b33;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    cursor: pointer;
+}
+
+.custom-slider-container input[type=range]::-moz-range-thumb{
+    pointer-events: all;
+    width: 18px;
+    height: 18px;
+    background: #d33b33;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    cursor: pointer;
+}
+
+/* HIDE DEFAULT TRACK */
+.custom-slider-container input[type=range]::-webkit-slider-runnable-track{
+    background: transparent;
+}
+
+.custom-slider-container input[type=range]::-moz-range-track{
+    background: transparent;
+}
+
+/* CUSTOM TRACK */
+.slider-track{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 6px;
+    width: 100%;
+    background: #050000ff;
+    border-radius: 3px;
+    z-index: 1;
+}
+
+/* VALUES */
+.slider-values{
+    margin-bottom: 35px;
+    font-weight: bold;
+    color: #d33b33;
+    text-align: center;
+}
+
+/* BUTTON */
+.btn{
+    margin-top: 10px;
+     
+    padding: 6px 18px;
+    background: #d33b33;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
     </style>
 
     <!-- Start All Title Box -->
@@ -218,20 +300,34 @@
 
 
 
+@php
+$finalPrices = $products->map(function($product){
+    if($product->discount_rate > 0){
+        return $product->price - ($product->price * $product->discount_rate / 100);
+    } elseif($product->discount_amount > 0){
+        return $product->price - $product->discount_amount;
+    } else {
+        return $product->price;
+    }
+});
 
+$minPrice = floor($finalPrices->min());
+$maxPrice = ceil($finalPrices->max());
+@endphp
 
-                        <div class="filter-price-left">
-                            <div class="title-left">
-                                <h3>Price</h3>
-                            </div>
-                            <div class="price-box-slider">
-                                <div id="slider-range"></div>
-                                <p>
-                                    <input type="text" id="amount" readonly style="border:0; color:#fbb714; font-weight:bold;">
-                                    <button class="btn hvr-hover" type="submit">Filter</button>
-                                </p>
-                            </div>
-                        </div>
+<div class="filter-price-left">
+    <div class="title-left"><h3>Price</h3></div>
+
+    <div class="custom-slider-container">
+        <input type="range" id="minPriceRange" min="{{ $minPrice }}" max="{{ $maxPrice }}" value="{{ $minPrice }}">
+        <input type="range" id="maxPriceRange" min="{{ $minPrice }}" max="{{ $maxPrice }}" value="{{ $maxPrice }}">
+        <div class="slider-track"></div>
+        <div class="slider-values">
+            <span id="minVal">Rs.{{ $minPrice }}</span> - <span id="maxVal">Rs.{{ $maxPrice }}</span>
+        </div>
+        <!-- <button id="filterPriceBtn" class="btn">Filter</button> -->
+    </div>
+</div>
 
 
 <div class="filter-brand-left">
@@ -383,43 +479,7 @@
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane fade show active" id="grid-view">
                                    
-<!--                                     
-                                 <div class="row">
-@forelse($products as $product)
-                                        <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
-                                            <div class="products-single fix">
-                                                <div class="box-img-hover">
-                                                    <div class="type-lb">
-                                                        <p class="sale">Sale</p>
-                                                    </div>
-
-													<img src="{{ asset($product->image) }}" class="img-fluid" alt="">
-
-                                                    <div class="mask-icon">
-                                                        <ul>
-                                                            <li><a href="#" data-toggle="tooltip" data-placement="right" title="View"><i class="fas fa-eye"></i></a></li>
-                                                        </ul>
-                                                        <a class="cart" href="#">Add to Cart</a>
-                                                    </div>
-                                                </div>
-                                                <div class="why-text">
-                                                    <h4>{{ $product->product_name }}</h4>
-                                                    <h5> ₹{{ $product->price }}</h5>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                      
-                                        
-                                        
-                                        
-                                        
-                                          @empty
-        <p class="text-center">No products found</p>
-    @endforelse
-                                        
-                                         
-                                    </div> -->
+ 
 <div class="row g-3" id="grid-view">
 @forelse($products as $product)
     @php
@@ -436,7 +496,7 @@
         }
     @endphp
 
-    <div class="col-sm-6 col-md-4 col-lg-4" data-brand-id="{{ $product->brand_id }}">
+    <div class="col-sm-6 col-md-4 col-lg-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}">
         <div class="product-card" >
 
             <div class="image-box">
@@ -504,7 +564,7 @@
         }
     @endphp
 
-    <div class="row mb-4" data-brand-id="{{ $product->brand_id }}">
+    <div class="row mb-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}">
         
         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
             <div class="products-single fix">
@@ -582,50 +642,84 @@
     </div>
     <!-- End Shop Page -->
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
+   <script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const minSlider = document.getElementById("minPriceRange");
+    const maxSlider = document.getElementById("maxPriceRange");
+    const minValDisplay = document.getElementById("minVal");
+    const maxValDisplay = document.getElementById("maxVal");
     const brandRadios = document.querySelectorAll(".brand-filter");
+    const clearBrandBtn = document.getElementById("clearBrand");
 
-    // Grid + List view products select பண்ணுது
-    const productItems = document.querySelectorAll(
-        "#grid-view > div.col-sm-6, #grid-view > div.col-md-4, #grid-view > div.col-lg-4, #list-view > .row.mb-4"
-    );
+    const productItems = document.querySelectorAll(".product-item");
 
-    brandRadios.forEach(radio => {
-        radio.addEventListener("change", function() {
-            const brandId = this.dataset.brandId;
+    let selectedBrand = null;
 
-            productItems.forEach(item => {
-                if(item.dataset.brandId === brandId) {
-                    // Grid column
-                    if(item.classList.contains('col-sm-6') || item.classList.contains('col-md-4') || item.classList.contains('col-lg-4')){
-                        item.style.display = "block";
-                    } else {
-                        // List view row
-                        item.style.display = "flex";
-                    }
-                } else {
-                    item.style.display = "none";
-                }
-            });
-        });
-    });
+    function updateSliderUI() {
+        let minVal = parseInt(minSlider.value);
+        let maxVal = parseInt(maxSlider.value);
 
-    // Clear button
-    document.getElementById("clearBrand").addEventListener("click", function() {
+        if (minVal > maxVal) {
+            [minSlider.value, maxSlider.value] = [maxVal, minVal];
+            [minVal, maxVal] = [maxVal, minVal];
+        }
+
+        minValDisplay.innerText = "Rs." + minVal;
+        maxValDisplay.innerText = "Rs." + maxVal;
+    }
+
+    function applyFilters() {
+        const minVal = parseInt(minSlider.value);
+        const maxVal = parseInt(maxSlider.value);
+
         productItems.forEach(item => {
-            if(item.classList.contains('col-sm-6') || item.classList.contains('col-md-4') || item.classList.contains('col-lg-4')){
-                item.style.display = "block"; // grid
+            const price = parseFloat(item.dataset.price);
+            const brandId = item.dataset.brandId;
+
+            const priceMatch = price >= minVal && price <= maxVal;
+            const brandMatch = selectedBrand === null || brandId === selectedBrand;
+
+            if (priceMatch && brandMatch) {
+                item.style.display = "";
             } else {
-                item.style.display = "flex"; // list
+                item.style.display = "none";
             }
         });
-        brandRadios.forEach(r => r.checked = false);
+    }
+
+    /* PRICE EVENTS */
+    minSlider.addEventListener("input", () => {
+        updateSliderUI();
+        applyFilters();
     });
 
+    maxSlider.addEventListener("input", () => {
+        updateSliderUI();
+        applyFilters();
+    });
+
+    /* BRAND EVENTS */
+    brandRadios.forEach(radio => {
+        radio.addEventListener("change", function () {
+            selectedBrand = this.dataset.brandId;
+            applyFilters();
+        });
+    });
+
+    clearBrandBtn.addEventListener("click", function () {
+        selectedBrand = null;
+        brandRadios.forEach(r => r.checked = false);
+        applyFilters();
+    });
+
+    // Initial load
+    updateSliderUI();
+    applyFilters();
 });
 </script>
 
+
+ 
 
 @endsection
