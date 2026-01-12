@@ -156,15 +156,23 @@
                 <div class="attr-nav">
                     <ul>
                         <li class="search"><a href="#"><i class="fa fa-search"></i></a></li>
-                        <li class="side-menu"><a href="#">
-						 
+                        
 
-                    <li class="nav-item {{ request()->routeIs('Cart') ? 'active' : '' }}">
+                   <li class="nav-item">
+                            <a class="nav-link position-relative" href="{{ route('Cart') }}">
+                        <i class="fa fa-shopping-bag"></i>
+                            <span class="badge" id="cartCount">0</span>
+                            </a>
+            </li>
+
+
+                    <!-- <li class="nav-item {{ request()->routeIs('Cart') ? 'active' : '' }}">
                         <a class="nav-link position-relative" href="{{ route('Cart') }}">
                         <i class="fa fa-shopping-bag"></i>
                             <span class="badge">3</span>
                         </a>
-                    </li>
+                    </li> -->
+
 
                     </ul>
                 </div>
@@ -397,6 +405,45 @@
 <script src="{{ asset('js/jquery-3.2.1.min.js') }}"></script>
 <script src="{{ asset('js/popper.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const addCartButtons = document.querySelectorAll(".add-cart");
+    const cartCountEl = document.getElementById("cartCount");
+
+    // LocalStorage-ல் cart initialize பண்ணுங்க
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    function updateCartCount() {
+        cartCountEl.innerText = cart.length;
+    }
+
+    // Page load-ல count set பண்ணுங்க
+    updateCartCount();
+
+    // Add to Cart click
+    addCartButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const productId = this.dataset.id;
+
+            // Cart-ல் add பண்ணுங்க
+            cart.push(productId);
+
+            // LocalStorage-ல் save பண்ணுங்க
+            localStorage.setItem("cart", JSON.stringify(cart));
+
+            // Badge update பண்ணுங்க
+            updateCartCount();
+
+            // Optional: small notification
+            alert("Product added to cart!");
+        });
+    });
+
+});
+</script>
+
 
 <script src="{{ asset('js/jquery.superslides.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap-select.js') }}"></script>

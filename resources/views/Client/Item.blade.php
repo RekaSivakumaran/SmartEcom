@@ -259,8 +259,9 @@
 </div> -->
 
  <p style="font-size:18px; font-style:italic;" class="small text-muted">
-    Showing all 4 results
+    Showing all {{ $products->count() }} results
 </p>
+
 
 <div class="filter-sidebar-left">
     <div class="title-left">
@@ -536,7 +537,9 @@ $maxPrice = ceil($finalPrices->max());
                     <span class="sale-badge">SALE</span>
                 @endif
 
-                <div class="add-cart">Add to Cart</div>
+                <div class="add-cart btn btn-primary mt-1" data-id="{{ $product->id }}">Add to Cart</div>
+
+                <!-- <div class="add-cart">Add to Cart</div> -->
             </div>
 
             <div class="product-info">
@@ -640,9 +643,15 @@ $maxPrice = ceil($finalPrices->max());
                     {{ Str::limit($product->description, 250) }}
                 </p>
 
-                <a class="btn hvr-hover" href="#">
+                <!-- <a class="btn hvr-hover" href="#">
                     Add to Cart
-                </a>
+                </a> -->
+
+                <a href="javascript:void(0)" 
+   class="btn hvr-hover add-cart" 
+   data-id="{{ $product->id }}">
+    Add to Cart
+</a>
 
             </div>
         </div>
