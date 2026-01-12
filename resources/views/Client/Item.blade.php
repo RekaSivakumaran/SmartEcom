@@ -246,12 +246,21 @@
                 <div class="col-xl-3 col-lg-3 col-sm-12 col-xs-12 sidebar-shop-left">
                     <div class="product-categori">
 
-                        <div class="search-product">
-                            <form action="#">
-                                <input class="form-control" placeholder="Search here..." type="text">
-                                <button type="submit"> <i class="fa fa-search"></i> </button>
-                            </form>
-                        </div>
+                       <!-- <div class="search-product">
+    <form action="javascript:void(0);">
+        <input class="form-control"
+               id="productSearch"
+               placeholder="Search here..."
+               type="text">
+        <button type="submit">
+            <i class="fa fa-search"></i>
+        </button>
+    </form>
+</div> -->
+
+ <p style="font-size:18px; font-style:italic;" class="small text-muted">
+    Showing all 4 results
+</p>
 
 <div class="filter-sidebar-left">
     <div class="title-left">
@@ -448,7 +457,19 @@ $maxPrice = ceil($finalPrices->max());
                     <div class="right-product-box">
                         <div class="product-item-filter row">
                             <div class="col-12 col-sm-8 text-center text-sm-left">
-                                <div class="toolbar-sorter-right">
+
+                            <div class="search-product">
+    <form action="javascript:void(0);">
+        <input class="form-control"
+               id="productSearch"
+               placeholder="Search here..."
+               type="text">
+        <button type="submit">
+            <i class="fa fa-search"></i>
+        </button>
+    </form>
+</div>
+                                <!-- <div class="toolbar-sorter-right">
                                     <span>Sort by </span>
                                     <select id="basic" class="selectpicker show-tick form-control" data-placeholder="$ USD">
 									<option data-display="Select">Nothing</option>
@@ -457,8 +478,8 @@ $maxPrice = ceil($finalPrices->max());
 									<option value="3">Low Price → High Price</option>
 									<option value="4">Best Selling</option>
 								</select>
-                                </div>
-                                <p>Showing all 4 results</p>
+                                </div> -->
+                               
                             </div>
                             <div class="col-12 col-sm-4 text-center text-sm-right">
                                 <ul class="nav nav-tabs ml-auto">
@@ -496,7 +517,8 @@ $maxPrice = ceil($finalPrices->max());
         }
     @endphp
 
-    <div class="col-sm-6 col-md-4 col-lg-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}">
+    <div class="col-sm-6 col-md-4 col-lg-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}"
+    data-name="{{ strtolower($product->name) }}">
         <div class="product-card" >
 
             <div class="image-box">
@@ -564,7 +586,8 @@ $maxPrice = ceil($finalPrices->max());
         }
     @endphp
 
-    <div class="row mb-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}">
+    <div class="row mb-4 product-item" data-brand-id="{{ $product->brand_id }}" data-price="{{ $finalPrice }}"
+    data-name="{{ strtolower($product->name) }}">
         
         <div class="col-sm-6 col-md-6 col-lg-4 col-xl-4">
             <div class="products-single fix">
@@ -720,6 +743,29 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 
- 
+ <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const searchInput = document.getElementById("productSearch");
+    const productItems = document.querySelectorAll(".product-item");
+
+    searchInput.addEventListener("keyup", function () {
+
+        const searchValue = this.value.toLowerCase().trim();
+
+        productItems.forEach(item => {
+            const productName = item.dataset.name;
+
+            if (productName.includes(searchValue)) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
+    });
+
+});
+</script>
+
 
 @endsection

@@ -112,6 +112,10 @@ Route::get('/client/Item', function () {
     return view('Client.Item');   
 })->name('Item');
 
+Route::get('/client/Cart', function () {
+    return view('Client.Cart');   
+})->name('Cart');
+
 Route::get('/client', [ClientController::class, 'index'])->name('home');
 Route::get('/product/{id}', [ClientController::class, 'show'])->name('Client.shopdetails');
 // Route::get('/client/Item', [ClientController::class, 'showCategories'])

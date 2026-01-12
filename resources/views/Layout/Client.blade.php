@@ -157,9 +157,15 @@
                     <ul>
                         <li class="search"><a href="#"><i class="fa fa-search"></i></a></li>
                         <li class="side-menu"><a href="#">
-						<i class="fa fa-shopping-bag"></i>
+						 
+
+                    <li class="nav-item {{ request()->routeIs('Cart') ? 'active' : '' }}">
+                        <a class="nav-link position-relative" href="{{ route('Cart') }}">
+                        <i class="fa fa-shopping-bag"></i>
                             <span class="badge">3</span>
-					</a></li>
+                        </a>
+                    </li>
+
                     </ul>
                 </div>
                 
