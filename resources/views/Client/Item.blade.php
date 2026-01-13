@@ -537,7 +537,18 @@ $maxPrice = ceil($finalPrices->max());
                     <span class="sale-badge">SALE</span>
                 @endif
 
-                <div class="add-cart btn btn-primary mt-1" data-id="{{ $product->id }}">Add to Cart</div>
+                <!-- <div class="add-cart btn btn-primary mt-1" data-id="{{ $product->id }}">Add to Cart</div> -->
+        
+
+ <a class="add-cart btn btn-primary mt-1"
+                   data-id="{{ $product->id }}"
+                   data-name="{{ $product->name }}"
+                   data-price="{{ $finalPrice }}"
+                   data-image="{{ asset($product->image) }}">
+                   Add to Cart
+                </a>
+
+
 
                 <!-- <div class="add-cart">Add to Cart</div> -->
             </div>
@@ -647,11 +658,23 @@ $maxPrice = ceil($finalPrices->max());
                     Add to Cart
                 </a> -->
 
-                <a href="javascript:void(0)" 
+                <!-- <a href="javascript:void(0)" 
    class="btn hvr-hover add-cart" 
    data-id="{{ $product->id }}">
     Add to Cart
-</a>
+</a> -->
+
+ 
+
+  <a class="btn hvr-hover add-cart"
+                   data-id="{{ $product->id }}"
+                   data-name="{{ $product->name }}"
+                   data-price="{{ $finalPrice }}"
+                   data-image="{{ asset($product->image) }}">
+                   Add to Cart
+                </a>
+
+
 
             </div>
         </div>

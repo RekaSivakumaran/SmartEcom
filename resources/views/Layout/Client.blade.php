@@ -131,11 +131,11 @@
 
 
                        
-                        <li class="dropdown">
+                        <!-- <li class="dropdown">
                              <a href="#" class="nav-link">
   SHOP <i class="fas fa-caret-down"></i>
 </a>
-                            <!-- <a href="#" class="nav-link dropdown-toggle arrow" data-toggle="dropdown">SHOP</a> -->
+                            <a href="#" class="nav-link dropdown-toggle arrow" data-toggle="dropdown">SHOP</a>
                             <ul class="dropdown-menu">
                                 <li><a href="cart.html">Cart</a></li>
                                 <li><a href="checkout.html">Checkout</a></li>
@@ -143,7 +143,7 @@
                                 <li><a href="wishlist.html">Wishlist</a></li>
                                 <li><a href="shop-detail.html">Shop Detail</a></li>
                             </ul>
-                        </li>
+                        </li> -->
 
                          <li class="nav-item {{ request()->routeIs('contactus') || request()->is('client/contactus') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('contactus') }}">Contact Us</a>
@@ -407,42 +407,70 @@
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
 
+
+document.addEventListener("DOMContentLoaded", function () {
     const addCartButtons = document.querySelectorAll(".add-cart");
     const cartCountEl = document.getElementById("cartCount");
 
-    // LocalStorage-ல் cart initialize பண்ணுங்க
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    alert(cart);
 
     function updateCartCount() {
         cartCountEl.innerText = cart.length;
     }
 
-    // Page load-ல count set பண்ணுங்க
-    updateCartCount();
+    function updateButtons() {
+        addCartButtons.forEach(button => {
+            const productId = button.dataset.id;
+            if (cart.some(p => p.id == productId)) {
+                button.innerText = "Go to Basket";
+                button.classList.remove("btn-primary");
+                button.classList.add("btn-success");
+            }
+        });
+    }
 
-    // Add to Cart click
+    updateCartCount();
+    updateButtons();
+
     addCartButtons.forEach(button => {
         button.addEventListener("click", function () {
-            const productId = this.dataset.id;
+            const product = {
+                id: this.dataset.id,
+                name: this.dataset.name,
+                price: parseFloat(this.dataset.price),
+                img: this.dataset.image,
+                quantity: 1
+            };
 
-            // Cart-ல் add பண்ணுங்க
-            cart.push(productId);
+            if (cart.some(p => p.id == product.id)) {
+                window.location.href = "{{ route('Cart') }}";
+                return;
+            }
 
-            // LocalStorage-ல் save பண்ணுங்க
+            cart.push(product);
             localStorage.setItem("cart", JSON.stringify(cart));
 
-            // Badge update பண்ணுங்க
-            updateCartCount();
 
-            // Optional: small notification
-            alert("Product added to cart!");
+            updateCartCount();
+            this.innerText = "Go to Basket";
+            this.classList.remove("btn-primary");
+            this.classList.add("btn-success");
+
+            alert(product.name + " added to cart!");
+            alert(product.price + " added to cart!");
+             alert(product.quantity + " added to cart!");
         });
     });
-
 });
+
+
+
+
 </script>
+
+
 
 
 <script src="{{ asset('js/jquery.superslides.min.js') }}"></script>
