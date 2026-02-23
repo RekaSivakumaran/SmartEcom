@@ -35,4 +35,19 @@ class ProductModel extends Model
     public function brand() {
         return $this->belongsTo(BrandModel::class);
     }
+
+     protected $appends = ['final_price'];
+
+    public function getFinalPriceAttribute()
+    {
+        if ($this->discount_type === 'rate' && $this->discount_rate > 0) {
+            return $this->price - ($this->price * $this->discount_rate / 100);
+        }
+
+        if ($this->discount_type === 'amount' && $this->discount_amount > 0) {
+            return $this->price - $this->discount_amount;
+        }
+
+        return $this->price;
+    }
 }

@@ -119,10 +119,20 @@
                                             Buy
                                         </a>
 
-                                        <a class="btn hvr-hover" data-fancybox-close="" href="#" 
+                                        <!-- <a class="btn hvr-hover" data-fancybox-close="" href="#" 
                                             @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif>
                                             Add to Cart
-                                        </a>
+                                        </a> -->
+
+
+                                        <a class="btn hvr-hover" data-fancybox-close="" href="#" 
+                   data-id="{{ $product->id }}"
+                   data-name="{{ $product->name }}"
+                   data-price="{{ $product->final_price }}"
+                   data-image="{{ asset($product->image) }}">
+                   @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif
+                                            Add to Cart
+                </a>
 
                                     </div>
                                 </div>

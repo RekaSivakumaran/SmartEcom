@@ -115,6 +115,9 @@ Route::get('/client/Item', function () {
 Route::get('/client/Cart', function () {
     return view('Client.Cart');   
 })->name('Cart');
+Route::get('/client/ClientLogin', function () {
+    return view('Client.ClientLogin');   
+})->name('ClientLogin');
 
 Route::get('/client', [ClientController::class, 'index'])->name('home');
 Route::get('/product/{id}', [ClientController::class, 'show'])->name('Client.shopdetails');
@@ -132,3 +135,6 @@ Route::get('/products', [ClientController::class, 'showCategories'])
 // PRODUCTS BY SUB CATEGORY
 Route::get('/products/subcategory/{id}', [ClientController::class, 'productsBySubCategory'])
     ->name('products.bySubCategory');
+
+    Route::post('/client/register', [ClientController::class, 'register'])
+    ->name('client.register');

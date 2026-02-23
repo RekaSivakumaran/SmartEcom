@@ -15,7 +15,15 @@
                         <div class="col-md-12">
                             <h1 class="m-b-20"><strong>Welcome To <br> SMart Ecom</strong></h1>
                             <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
-                            <p><a class="btn hvr-hover" href="#">Shop New</a></p>
+                             
+
+     <p>
+    <a class="btn hvr-hover" href="{{ route('products.all') }}">
+        Shop
+    </a>
+</p>
+
+
                         </div>
                     </div>
                 </div>
@@ -213,9 +221,9 @@
     High-quality product descriptions, clear pricing, and professional layouts can boost sales and build trust.</p>
                             </div>
                             <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li> -->
                             </ul>
                         </div>
                     </div>
@@ -232,9 +240,9 @@
     High-quality product descriptions, clear pricing, and professional layouts can boost sales and build trust.</p>
                      </div>
                             <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li> -->
                             </ul>
                         </div>
                     </div>
@@ -251,9 +259,9 @@
     High-quality product descriptions, clear pricing, and professional layouts can boost sales and build trust.</p>
                      </div>
                             <ul class="option-blog">
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li>
-                                <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li>
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Likes"><i class="far fa-heart"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Views"><i class="fas fa-eye"></i></a></li> -->
+                                <!-- <li><a href="#" data-toggle="tooltip" data-placement="right" title="Comments"><i class="far fa-comments"></i></a></li> -->
                             </ul>
                         </div>
                     </div>

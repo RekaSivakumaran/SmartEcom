@@ -8,5 +8,7 @@ class CustomerModel extends Model
 {
      protected $table = 'customers';
 
-     protected $fillable = ['name', 'email', 'mobile', 'status'];
+     protected $fillable = ['name', 'email', 'mobile', 'password', 'status'];
+
+      public $timestamps = false;
 }

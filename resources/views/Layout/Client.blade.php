@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Basic -->
+ 
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-    <!-- Mobile Metas -->
+    
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Site Metas -->
+    
     <title>SMart - Ecommerce</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- Site Icons -->
+    
     <!-- <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png"> -->
 <link rel="stylesheet"
@@ -36,7 +36,7 @@
 
 </head>
 <style>
-    /* Hide dropdown by default */
+    
 .dropdown.megamenu-fw .dropdown-menu {
     display: none;
     opacity: 0;
@@ -44,14 +44,14 @@
     transition: all 0.3s ease;
 }
 
-/* Show dropdown on hover */
+ 
 .dropdown.megamenu-fw:hover .dropdown-menu {
     display: block;
     opacity: 1;
     visibility: visible;
 }
 
-/* Optional: smooth hover experience */
+ 
 .dropdown.megamenu-fw {
     position: relative;
 }
@@ -148,6 +148,10 @@
                          <li class="nav-item {{ request()->routeIs('contactus') || request()->is('client/contactus') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('contactus') }}">Contact Us</a>
                         </li>
+
+                        <li class="nav-item {{ request()->routeIs('ClientLogin') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('ClientLogin') }}">Login</a>
+</li>
                         <!-- <li class="nav-item"><a class="nav-link" href="service.html">Our Service</a></li> -->
                         <!-- <li class="nav-item"><a class="nav-link" href="contact-us.html">Contact Us</a></li> -->
                     </ul>
@@ -164,6 +168,9 @@
                             <span class="badge" id="cartCount">0</span>
                             </a>
             </li>
+            <!-- <li class="nav-item {{ request()->routeIs('contactus') || request()->is('client/contactus') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ route('contactus') }}">Login</a>
+                        </li> -->
 
 
                     <!-- <li class="nav-item {{ request()->routeIs('Cart') ? 'active' : '' }}">
@@ -414,7 +421,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const cartCountEl = document.getElementById("cartCount");
 
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    alert(cart);
+     
 
     function updateCartCount() {
         cartCountEl.innerText = cart.length;
@@ -458,9 +465,7 @@ document.addEventListener("DOMContentLoaded", function () {
             this.classList.remove("btn-primary");
             this.classList.add("btn-success");
 
-            alert(product.name + " added to cart!");
-            alert(product.price + " added to cart!");
-             alert(product.quantity + " added to cart!");
+            
         });
     });
 });

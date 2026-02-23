@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\MainCategoryModel;
 use App\Models\ProductModel;
 use App\Models\BrandModel;
+use App\Models\CustomerModel;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
@@ -113,6 +116,36 @@ public function productsBySubCategory(Request $request, $id)
 }
 
 
+
+public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+        'name' => 'required|max:100',
+        'email' => 'required|email|unique:customers,email',
+        'mobile' => 'required|max:20',
+        'password' => 'required|confirmed|min:6',
+    ]);
+
+    if ($validator->fails()) {
+        // Do NOT redirect, do NOT show error messages
+        // You can just log it or silently return
+        return redirect()->back(); 
+    }
+
+    $customer = CustomerModel::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'mobile' => $request->mobile,
+        'password' => Hash::make($request->password),
+        'status' => 'active',
+    ]);
+
+    if ($customer) {
+        return redirect()->back()->with('success', 'Registration Successful! Please Login.');
+    } else {
+        return redirect()->back()->with('error', 'Registration Failed!');
+    }
+    }
      
 
 }
