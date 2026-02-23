@@ -130,8 +130,9 @@
                             <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
                             <h4>Your cart is empty</h4>
                             <p class="text-muted">Add some products to get started!</p>
-                            <a href="{{ url('/') }}" class="btn btn-primary mt-3">Continue Shopping</a>
-                        </td>
+<a href="{{ route('products.all') }}" class="btn btn-primary mt-3">
+    Continue Shopping
+</a>                        </td>
                     </tr>
                 `;
                 
