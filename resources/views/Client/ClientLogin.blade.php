@@ -187,12 +187,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Only switch to login form if registration was successful
     @if(session('success'))
         document.querySelector('.signup-form').classList.remove('active');
-        document.querySelector('.login-form').classList.add('active');
-    @else
-        document.querySelector('.signup-form').classList.add('active');
-        document.querySelector('.login-form').classList.remove('active');
-   
-       
+        document.querySelector('.login-form').classList.add('active');   
     @endif
 });
 </script>
