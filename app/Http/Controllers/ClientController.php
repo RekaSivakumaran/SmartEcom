@@ -176,20 +176,11 @@ public function register(Request $request)
 
 
 public function logout(Request $request)
-{ 
-    // Log the session data before flushing (clear)
+{  
     Log::info('Session Data Before Logout:', $request->session()->all());
-
-    // Clear all session data
     $request->session()->flush();
-
-    // Log the session data after flushing
-    Log::info('Session Data After Logout:', $request->session()->all());
-
-    // Optionally regenerate session ID for security
+    Log::info('Session Data After Logout:', $request->session()->all()); 
     $request->session()->regenerate();
-
-    // Redirect to the ClientLogin route
     return redirect()->route('ClientLogin');
 }
 

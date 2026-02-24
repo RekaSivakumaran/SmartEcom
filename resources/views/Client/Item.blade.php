@@ -94,6 +94,24 @@
     background: #c62828;
 }
 
+.btn{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: #e53935;
+    color: #fff;
+    text-align: center;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #c62828;
+}
+
+
 .view-icon:hover{
     background: #c62828;
     transform: scale(1.10);
@@ -539,14 +557,44 @@ $maxPrice = ceil($finalPrices->max());
 
                 <!-- <div class="add-cart btn btn-primary mt-1" data-id="{{ $product->id }}">Add to Cart</div> -->
         
+                <!-- @if(session()->has('client_id'))
+    <a href="javascript:void(0);"
+    class="add-cart btn btn-primary mt-1"
+       data-id="{{ $product->id }}"
+       data-name="{{ $product->name }}"
+       data-price="{{ $finalPrice }}"
+       data-image="{{ asset($product->image) }}">
+       Add to Cart
+    </a>
+@else
+    <a href="{{ route('ClientLogin') }}"
+       class="add-cart btn btn-primary mt-1">
+       Add to Cart
+    </a>
+@endif -->
 
- <a class="add-cart btn btn-primary mt-1"
+@if(session()->has('client_id'))
+    <a href="javascript:void(0);"
+       class="add-cart btn btn-primary mt-1"
+       data-id="{{ $product->id }}"
+       data-name="{{ $product->name }}"
+       data-price="{{ $finalPrice }}"
+       data-image="{{ asset($product->image) }}">
+       Add to Cart
+    </a>
+@else
+    <a href="{{ route('ClientLogin') }}"
+       class="btn btn-primary mt-1">
+       Add to Cart
+    </a>
+@endif
+ <!-- <a class="add-cart btn btn-primary mt-1"
                    data-id="{{ $product->id }}"
                    data-name="{{ $product->name }}"
                    data-price="{{ $finalPrice }}"
                    data-image="{{ asset($product->image) }}">
                    Add to Cart
-                </a>
+                </a> -->
 
 
 
@@ -665,14 +713,46 @@ $maxPrice = ceil($finalPrices->max());
 </a> -->
 
  
-
-  <a class="btn hvr-hover add-cart"
+<!-- @if(session()->has('client_id'))
+    <a class="btn hvr-hover add-cart"
                    data-id="{{ $product->id }}"
                    data-name="{{ $product->name }}"
                    data-price="{{ $finalPrice }}"
                    data-image="{{ asset($product->image) }}">
                    Add to Cart
                 </a>
+@else
+    <a href="{{ route('ClientLogin') }}"
+       class="btn hvr-hover add-cart">
+       Add to Cart
+    </a>
+@endif -->
+
+
+@if(session()->has('client_id'))
+    <a href="javascript:void(0);"
+       class="btn hvr-hover add-cart"
+       data-id="{{ $product->id }}"
+       data-name="{{ $product->name }}"
+       data-price="{{ $finalPrice }}"
+       data-image="{{ asset($product->image) }}">
+       Add to Cart
+    </a>
+@else
+    <a href="{{ route('ClientLogin') }}"
+       class="btn hvr-hover">
+       Add to Cart
+    </a>
+@endif
+
+
+  <!-- <a class="btn hvr-hover add-cart"
+                   data-id="{{ $product->id }}"
+                   data-name="{{ $product->name }}"
+                   data-price="{{ $finalPrice }}"
+                   data-image="{{ asset($product->image) }}">
+                   Add to Cart
+                </a> -->
 
 
 

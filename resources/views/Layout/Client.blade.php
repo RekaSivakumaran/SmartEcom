@@ -218,15 +218,21 @@
               
                 <div class="attr-nav">
                     <ul>
-                        <li class="search"><a href="#"><i class="fa fa-search"></i></a></li>
+                        <!-- <li class="search"><a href="#"><i class="fa fa-search"></i></a></li> -->
                         
 
                    <li class="nav-item">
-                            <a class="nav-link position-relative" href="{{ route('Cart') }}">
-                        <i class="fa fa-shopping-bag"></i>
-                            <span class="badge" id="cartCount">0</span>
-                            </a>
-            </li>
+    @if(session()->has('client_id'))
+        <a class="nav-link position-relative" href="{{ route('Cart') }}">
+            <i class="fa fa-shopping-bag"></i>
+            <span class="badge" id="cartCount">0</span>
+        </a>
+    @else
+        <a class="nav-link position-relative" href="{{ route('ClientLogin') }}">
+            <i class="fa fa-shopping-bag"></i>
+        </a>
+    @endif
+</li>
             <!-- <li class="nav-item {{ request()->routeIs('contactus') || request()->is('client/contactus') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('contactus') }}">Login</a>
                         </li> -->
@@ -473,17 +479,21 @@
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 
 <script>
-
-
 document.addEventListener("DOMContentLoaded", function () {
-    const addCartButtons = document.querySelectorAll(".add-cart");
+
     const cartCountEl = document.getElementById("cartCount");
+    const addCartButtons = document.querySelectorAll(".add-cart");
 
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
-     
 
     function updateCartCount() {
-        cartCountEl.innerText = cart.length;
+        if(cartCountEl){
+            cartCountEl.innerText = cart.length;
+        }
+    }
+
+    function saveCart() {
+        localStorage.setItem("cart", JSON.stringify(cart));
     }
 
     function updateButtons() {
@@ -501,37 +511,36 @@ document.addEventListener("DOMContentLoaded", function () {
     updateButtons();
 
     addCartButtons.forEach(button => {
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            const productId = this.dataset.id;
+            if (!productId) return;
+
+            if (cart.some(p => p.id == productId)) {
+                window.location.href = "{{ route('Cart') }}";
+                return;
+            }
+
             const product = {
-                id: this.dataset.id,
+                id: productId,
                 name: this.dataset.name,
                 price: parseFloat(this.dataset.price),
                 img: this.dataset.image,
                 quantity: 1
             };
 
-            if (cart.some(p => p.id == product.id)) {
-                window.location.href = "{{ route('Cart') }}";
-                return;
-            }
-
             cart.push(product);
-            localStorage.setItem("cart", JSON.stringify(cart));
-
-
+            saveCart();
             updateCartCount();
+
             this.innerText = "Go to Basket";
             this.classList.remove("btn-primary");
             this.classList.add("btn-success");
-
-            
         });
     });
+
 });
-
-
-
-
 </script>
 
 
