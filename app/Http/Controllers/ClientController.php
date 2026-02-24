@@ -192,5 +192,11 @@ public function logout(Request $request)
 //     return redirect()->route('ClientLogin'); 
 // }
      
+public function showDeliveryInfo($productId)
+{
+    $product = ProductModel::findOrFail($productId);  
+    return view('client.DeliveryInfo', compact('product'));
+}
+
 
 }

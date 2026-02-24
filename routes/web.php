@@ -149,3 +149,6 @@ Route::post('/client/login', [ClientController::class, 'login'])
     ->name('client.login');
 
 Route::post('/client/logout', [ClientController::class, 'logout'])->name('client.logout');
+
+Route::get('/delivery-info/{product}', [ClientController::class, 'showDeliveryInfo'])
+     ->name('delivery.info');

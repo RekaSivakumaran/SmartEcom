@@ -114,10 +114,16 @@
 
                                 <div class="price-box-bar">
                                     <div class="cart-and-bay-btn">
-                                        <a class="btn hvr-hover" data-fancybox-close="" href="#" 
-                                            @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif>
-                                            Buy
-                                        </a>
+                                       @if(session()->has('client_id'))
+    <a class="btn hvr-hover" href="{{ route('delivery.info', $product->id) }}"
+       @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif>
+       Buy
+    </a>
+@else
+    <a class="btn hvr-hover" href="{{ route('ClientLogin') }}">
+       Buy
+    </a>
+@endif
 
                                         <!-- <a class="btn hvr-hover" data-fancybox-close="" href="#" 
                                             @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif>
