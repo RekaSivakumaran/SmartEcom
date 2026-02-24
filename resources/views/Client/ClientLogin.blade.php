@@ -117,6 +117,17 @@ p{
     font-weight: 500;
     border: 1px solid #c3e6cb;
 }
+
+.alert-error{
+    background:#f8d7da;
+    color:#721c24;
+    padding:12px;
+    border-radius:6px;
+    margin-bottom:15px;
+    text-align:center;
+    font-weight:500;
+    border:1px solid #f5c6cb;
+}
 </style>
 
 
@@ -131,13 +142,22 @@ p{
         {{ session('success') }}
     </div>
 @endif
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
+
+@if(session('error'))
+    <div class="alert-error" id="errorMessage">
+        {{ session('error') }}
+    </div>
+@endif
+        <form method="POST" action="{{ route('client.login') }}">
+        @csrf
+
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="password" name="password" placeholder="Password" required>
 
         <a href="#" class="link">Forgot password?</a>
 
-        <button class="primary-btn">Login</button>
-
+        <button type="submit" class="primary-btn">Login</button>
+    </form>
         <p>
             Don't have an account?
             <span class="toggle-btn" onclick="showSignup()">Signup</span>
@@ -193,14 +213,14 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-setTimeout(function () {
-    let message = document.getElementById('successMessage');
-    if (message) {
-        message.style.transition = "opacity 0.5s";
-        message.style.opacity = "0";
-        setTimeout(() => message.remove(), 500);
-    }
-}, 3000);
+setTimeout(() => {
+    document.querySelectorAll('.alert-success, .alert-error')
+        .forEach(msg => {
+            msg.style.transition = "opacity 0.5s";
+            msg.style.opacity = "0";
+            setTimeout(() => msg.remove(), 500);
+        });
+}, 2000);
 </script>
 
 @endsection

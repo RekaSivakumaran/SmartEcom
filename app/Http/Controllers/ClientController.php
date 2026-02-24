@@ -10,6 +10,8 @@ use App\Models\CustomerModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+
 
 class ClientController extends Controller
 {
@@ -146,6 +148,58 @@ public function register(Request $request)
         return redirect()->back()->with('error', 'Registration Failed!');
     }
     }
+
+    public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
+
+    $customer = CustomerModel::where('email', $request->email)
+        ->where('status', 'active')
+        ->first();
+
+    if (!$customer || !Hash::check($request->password, $customer->password)) {
+        return redirect()->back()->with('error', 'Invalid email or password');
+    }
+
+    // Store login session
+    session([
+        'client_id' => $customer->id,
+        'client_name' => $customer->name
+    ]);
+
+    return redirect()->route('home');
+}
+
+
+
+public function logout(Request $request)
+{ 
+    // Log the session data before flushing (clear)
+    Log::info('Session Data Before Logout:', $request->session()->all());
+
+    // Clear all session data
+    $request->session()->flush();
+
+    // Log the session data after flushing
+    Log::info('Session Data After Logout:', $request->session()->all());
+
+    // Optionally regenerate session ID for security
+    $request->session()->regenerate();
+
+    // Redirect to the ClientLogin route
+    return redirect()->route('ClientLogin');
+}
+
+// public function logout(Request $request)
+// { 
+//        dd($request->session()->all());
+//         $request->session()->flush();
+
+//     return redirect()->route('ClientLogin'); 
+// }
      
 
 }

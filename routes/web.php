@@ -136,5 +136,16 @@ Route::get('/products', [ClientController::class, 'showCategories'])
 Route::get('/products/subcategory/{id}', [ClientController::class, 'productsBySubCategory'])
     ->name('products.bySubCategory');
 
+    // Route::post('/client/register', [ClientController::class, 'register'])
+    // ->name('client.register');
+
+    // Route::post('/client/login', [ClientController::class, 'login'])
+    // ->name('client.login');
+
     Route::post('/client/register', [ClientController::class, 'register'])
     ->name('client.register');
+
+Route::post('/client/login', [ClientController::class, 'login'])
+    ->name('client.login');
+
+Route::post('/client/logout', [ClientController::class, 'logout'])->name('client.logout');

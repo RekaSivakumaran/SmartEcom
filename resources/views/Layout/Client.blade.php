@@ -84,7 +84,33 @@
                    
                     <div class="our-link">
                         <ul>
-                            <li><a href="#">My Account</a></li>
+
+     
+
+
+    @if(session()->has('client_id'))
+    <!-- Logged in -->
+    <li class="nav-item">
+        <a class="nav-link" href="#">Welcome, {{ session('client_name') }}</a>
+    </li>
+    <li class="nav-item">
+        <form id="logout-form" method="POST" action="{{ route('client.logout') }}" style="display:inline;">
+            @csrf
+            <button type="submit" class="nav-link" 
+        style="background:none; color:white; font-weight:bold; border:none; padding:0; cursor:pointer;"
+        onmouseover="this.style.color='red';" 
+        onmouseout="this.style.color='white';">
+    LOGOUT
+            </button>
+        </form>
+    </li>
+@else
+    <li><a href="#">My Account</a></li>
+@endif
+
+
+
+                            
                             <!-- <li><a href="#">Our location</a></li>
                             <li><a href="#">Contact Us</a></li> -->
                         </ul>
@@ -149,9 +175,42 @@
                             <a class="nav-link" href="{{ route('contactus') }}">Contact Us</a>
                         </li>
 
-                        <li class="nav-item {{ request()->routeIs('ClientLogin') ? 'active' : '' }}">
+                        @if(!session()->has('client_id'))
+   <li class="nav-item {{ request()->routeIs('ClientLogin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('ClientLogin') }}">Login</a>
+    </li>
+@endif
+
+                        <!-- @if(session()->has('client_id'))
+    <li class="nav-item">
+        <form id="logout-form" method="POST" action="{{ route('client.logout') }}" style="display:inline; font-weight:bold; ">
+            @csrf
+            <a href="#" class="nav-link" onclick="event.preventDefault(); this.closest('form').submit();">
+                Logout
+            </a>
+        </form>
+    </li>
+@else
+    <li class="nav-item {{ request()->routeIs('ClientLogin') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('ClientLogin') }}">Login</a>
+    </li>
+@endif -->
+         
+      
+   
+
+      <!-- <li class="nav-item">
+            <form method="POST" action="{{ route('client.logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit" class="nav-link" style="background:none; border:none; padding:0; cursor:pointer;">
+                    Logout
+                </button>
+            </form>
+        </li> -->
+
+                        <!-- <li class="nav-item {{ request()->routeIs('ClientLogin') ? 'active' : '' }}">
     <a class="nav-link" href="{{ route('ClientLogin') }}">Login</a>
-</li>
+</li> -->
                         <!-- <li class="nav-item"><a class="nav-link" href="service.html">Our Service</a></li> -->
                         <!-- <li class="nav-item"><a class="nav-link" href="contact-us.html">Contact Us</a></li> -->
                     </ul>
