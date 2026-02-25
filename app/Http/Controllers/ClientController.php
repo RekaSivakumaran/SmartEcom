@@ -7,6 +7,8 @@ use App\Models\MainCategoryModel;
 use App\Models\ProductModel;
 use App\Models\BrandModel;
 use App\Models\CustomerModel;
+use App\Models\OrderModel;
+use App\Models\OrderItemModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -192,11 +194,118 @@ public function logout(Request $request)
 //     return redirect()->route('ClientLogin'); 
 // }
      
-public function showDeliveryInfo($productId)
+// public function showDeliveryInfo($productId)
+// {
+//     $product = ProductModel::findOrFail($productId);  
+//     return view('client.DeliveryInfo', compact('product'));
+// }
+
+public function showDeliveryInfo($productId, Request $request)
 {
-    $product = ProductModel::findOrFail($productId);  
-    return view('client.DeliveryInfo', compact('product'));
+    $quantity = $request->quantity ?? 1;
+
+    $product = ProductModel::findOrFail($productId);
+
+    return view('client.DeliveryInfo', compact('product', 'quantity'));
 }
 
+
+
+public function storeSingle(Request $request)
+{
+    $validated = $request->validate([
+
+        // Billing Required
+        'first_name' => 'required|string|max:100',
+        'last_name' => 'required|string|max:100',
+        'address1' => 'required|string|max:255',
+        'city' => 'required|string|max:100',
+        'country' => 'required|string|max:100',
+        'postcode' => 'required|string|max:20',
+        'phone' => 'required|string|max:20',
+        'email' => 'required|email|max:255',
+
+        // Shipping Only If Checked
+        'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
+        'ship_city' => 'required_if:ship_different,1|nullable|string|max:100',
+        'ship_country' => 'required_if:ship_different,1|nullable|string|max:100',
+        'ship_zip' => 'required_if:ship_different,1|nullable|string|max:20',
+        'ship_phone' => 'required_if:ship_different,1|nullable|string|max:20',
+    ]);
+
+    DB::beginTransaction();
+
+    $product = ProductModel::lockForUpdate()->findOrFail($request->product_id);
+
+
+    if ($product->quantity <= 0) {
+            return back()->with('error', 'Product is out of stock.');
+        }
+
+         $originalPrice = $product->price;
+
+        if ($product->discount_type == 'rate') {
+            $discountValue = $originalPrice * $product->discount_rate / 100;
+        } elseif ($product->discount_type == 'amount') {
+            $discountValue = $product->discount_amount;
+        } else {
+            $discountValue = 0;
+        }
+
+        $discountValue = min($discountValue, $originalPrice);
+        $finalPrice = $originalPrice - $discountValue;
+
+
+    DB::beginTransaction();
+
+    try {
+
+        $total = 0;
+        foreach ($cart as $item) {
+            $total += $item['price'] * $item['quantity'];
+        }
+
+        $order = OrderModel::create([
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $validated['email'],
+            'mobile_number' => $validated['phone'],
+
+            'billing_address1' => $validated['address1'],
+            'billing_address2' => $request->address2,
+            'billing_city' => $validated['city'],
+            'billing_country' => $validated['country'],
+            'billing_postcode' => $validated['postcode'],
+
+            'shipping_address1' => $request->ship_different ? $validated['ship_address1'] : null,
+            'shipping_address2' => $request->ship_different ? $request->ship_address2 : null,
+            'shipping_city' => $request->ship_different ? $validated['ship_city'] : null,
+            'shipping_country' => $request->ship_different ? $validated['ship_country'] : null,
+            'shipping_postcode' => $request->ship_different ? $validated['ship_zip'] : null,
+
+            'status' => 'Pending',
+            'payment_status' => 'Pending',
+            'total' => $finalPrice
+        ]);
+
+         OrderItemModel::create([
+            'order_id' => $order->id,
+            'product_id' => $product->id,
+            'image_path' => $product->image,
+            'quantity' => 1,
+            'price' => $finalPrice,
+            'total' => $finalPrice,
+        ]);
+
+        DB::commit();
+
+        return redirect()->route('home')
+            ->with('success', 'Order placed successfully!');
+
+    } catch (\Exception $e) {
+
+        DB::rollback();
+        return back()->with('error', 'Something went wrong.');
+    }
+}
 
 }

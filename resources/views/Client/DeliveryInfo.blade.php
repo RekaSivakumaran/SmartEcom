@@ -2,232 +2,110 @@
 
 @section('content')
 
- <div class="all-title-box">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <h2>Checkout</h2>
-                    <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Shop</a></li>
-                        <li class="breadcrumb-item active">Checkout </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
 
- <div class="checkout-container">
-  <!-- Billing Details -->
-  <div class="billing">
-    <h2>Billing Details</h2>
-    <form>
-      <div>
-        <label>First Name *</label>
-        <input type="text" value="sinthuja">
-      </div>
-      <div>
-        <label>Last Name *</label>
-        <input type="text" value="vijayajanan">
-      </div>
-      <div class="full-width">
-        <label>Street Address 1 *</label>
-        <input type="text" value="canada">
-      </div>
-      <div class="full-width">
-        <label>Street Address 2</label>
-        <input type="text" value="jndciuhwi">
-      </div>
-      <div>
-        <label>Town / City *</label>
-        <input type="text" value="dclehf">
-      </div>
-      <div>
-        <label>Country *</label>
-        <input type="text" value="siduhchc">
-      </div>
-      <div>
-        <label>Postcode / ZIP *</label>
-        <input type="text" value="iudhfi">
-      </div>
-      <div>
-        <label>Phone *</label>
-        <input type="text" value="5154666855">
-      </div>
-      <div class="full-width">
-        <label>Email address *</label>
-        <input type="email" value="sinthuja@gmail.com">
-      </div>
-      <div class="Checkfull-width">
-  <input type="checkbox" id="different-address">
-  <span>Ship to a different address?</span>
-</div>
-
- <div>
-        <label>First Name *</label>
-        <input type="text" value="sinthuja">
-      </div>
-      <div>
-        <label>Last Name *</label>
-        <input type="text" value="vijayajanan">
-      </div>
-      <div class="full-width">
-        <label>Street Address 1 *</label>
-        <input type="text" value="canada">
-      </div>
-      <div class="full-width">
-        <label>Street Address 2</label>
-        <input type="text" value="jndciuhwi">
-      </div>
-      <div>
-        <label>Town / City *</label>
-        <input type="text" value="dclehf">
-      </div>
-      <div>
-        <label>Country *</label>
-        <input type="text" value="siduhchc">
-      </div>
-      <div>
-        <label>Postcode / ZIP *</label>
-        <input type="text" value="iudhfi">
-      </div>
-      <div>
-        <label>Phone *</label>
-        <input type="text" value="5154666855">
-      </div>
-    </form>
-  </div>
-
-  <!-- Order Summary -->
-  <div class="order-summary">
-    <h2>Your Order</h2>
-    <table>
-      <tr>
-        <th>Product</th>
-        <th>Total</th>
-      </tr>
-      <tr>
-        <td>bag1</td>
-        <td>£8,000.00</td>
-      </tr>
-      <tr>
-        <td>bag</td>
-        <td>£1,500.00</td>
-      </tr>
-      <tr>
-        <td>glass</td>
-        <td>£6,000.00</td>
-      </tr>
-      <tr>
-        <td>bag</td>
-        <td>£2,000.00</td>
-      </tr>
-      <tr class="total-row">
-        <td>Subtotal:</td>
-        <td>£41,500.00</td>
-      </tr>
-      <tr>
-        <td>Shipping:</td>
-        <td>Free Shipping</td>
-      </tr>
-      <tr class="total-row">
-        <td>Total:</td>
-        <td>£41,500.00</td>
-      </tr>
-    </table>
-
-    <div class="payment-method">
-      <label><input type="radio" name="payment" checked> Cash on delivery</label>
-      <label><input type="radio" name="payment"> Opayo</label>
-    </div>
-
-    <button class="place-order">Place Order</button>
-  </div>
-</div>
 <style>
- .Checkfull-width {
-  display: flex;
-  align-items: center; /* Vertically centers checkbox and text */
-  gap: 12px;           /* This creates the specific horizontal space you want */
-  padding: 10px 0;
-  cursor: pointer;
-  width: 100%;         /* Ensures it takes up the full width of the form */
-}
 
-/* Fix: Match the class name to 'Checkfull-width' */
-.Checkfull-width input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin: 0;           /* Removes default browser margins */
-  accent-color: green;
-  cursor: pointer;
-  flex-shrink: 0;      /* Prevents checkbox from squishing */
-}
-
-.Checkfull-width span {
-  user-select: none;
-  white-space: nowrap; /* Keeps 'Ship to a different address?' on one line */
-  font-size: 16px;
-  color: #333;
-}
- /* .checkout-container {
+.checkout-container {
     display: flex;
-    justify-content: space-between;
-    max-width: 1000px;
-    margin: 0 auto;
     gap: 30px;
-  } */
+    flex-wrap: wrap;
+   
+}
 
-  .billing, .order-summary {
+.billing {
+    flex: 2;
     background: #fff;
     padding: 25px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.order-summary {
     flex: 1;
-  }
+    background: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-  .billing h2, .order-summary h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    color: #333;
-  }
-
-  .billing form {
+.billing form {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 15px 20px;
-  }
+}
 
-  .billing form label {
+.billing form label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
   }
 
-  .billing form input {
+   .billing form input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
   }
 
-  .billing form input:focus {
-    border-color: green;
-    outline: none;
-  }
-
-  .billing form .full-width {
+.full-width {
     grid-column: span 2;
-  }
+}
 
-  .order-summary table {
+#shippingDetails {
+    grid-column: span 2;
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px 20px;
+}
+
+#shippingDetails .full-width {
+    grid-column: span 2;
+}
+
+.Checkfull-width {
+    grid-column: span 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: bold;
+    cursor: pointer;    
+    padding: 10px 0;
+    width: 100%;    
+}
+
+.Checkfull-width input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;           /* Removes default browser margins */
+  accent-color: green;
+  cursor: pointer;
+  flex-shrink: 0;       
+}
+
+.Checkfull-width span {
+  user-select: none;
+  white-space: nowrap; /* Keeps 'Ship to a different address?' on one line */
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+
+ .order-summary table {
     width: 100%;
     border-collapse: collapse;
   }
 
   .order-summary table th, .order-summary table td {
     text-align: left;
-    padding: 10px 0;
+    padding: 10px 50px 0 0;
   }
 
   .order-summary table tr:not(:last-child) td {
@@ -261,5 +139,334 @@
   .place-order:hover {
     background: #0056b3;
   }
+ 
+
+@media(max-width: 768px){
+    .checkout-container {
+        flex-direction: column;
+    }
+}
+
 </style>
+
+<div class="all-title-box">
+    <div class="container">
+        <h2>Checkout</h2>
+    </div>
+</div>
+
+<div class="container my-5">
+<div class="checkout-container">
+
+    <!-- Billing Details -->
+    <div class="billing">
+        <h2>Billing Details</h2>
+
+        <form method="POST" action="{{ route('order.single') }}">
+    @csrf
+
+    {{-- SHOW ALL ERRORS --}}
+    @if ($errors->any())
+        <div style="color:red; margin-bottom:15px;">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+
+    <div>
+        <label>First Name *</label>
+        <input type="text" 
+               name="first_name" 
+               value="{{ old('first_name') }}">
+        @error('first_name')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div>
+        <label>Last Name *</label>
+        <input type="text" 
+               name="last_name" 
+               value="{{ old('last_name') }}">
+        @error('last_name')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div class="full-width">
+        <label>Street Address 1 *</label>
+        <input type="text" 
+               name="address1" 
+               value="{{ old('address1') }}">
+        @error('address1')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div class="full-width">
+        <label>Street Address 2</label>
+        <input type="text" 
+               name="address2" 
+               value="{{ old('address2') }}">
+    </div>
+
+
+    <div>
+        <label>Town / City *</label>
+        <input type="text" 
+               name="city" 
+               value="{{ old('city') }}">
+        @error('city')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div>
+        <label>Country *</label>
+        <input type="text" 
+               name="country" 
+               value="{{ old('country') }}">
+        @error('country')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div>
+        <label>Postcode / ZIP *</label>
+        <input type="text" 
+               name="postcode" 
+               value="{{ old('postcode') }}">
+        @error('postcode')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div>
+        <label>Phone *</label>
+        <input type="text" 
+               name="phone" 
+               value="{{ old('phone') }}">
+        @error('phone')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    <div class="full-width">
+        <label>Email *</label>
+        <input type="email" 
+               name="email" 
+               value="{{ old('email') }}">
+        @error('email')
+            <small style="color:red">{{ $message }}</small>
+        @enderror
+    </div>
+
+
+    {{-- Checkbox --}}
+    <div class="Checkfull-width">
+        <input type="checkbox" 
+               name="ship_different"
+               value="1"
+               id="different-address"
+               {{ old('ship_different') ? 'checked' : '' }}>
+        <span>Ship to a different address?</span>
+    </div>
+
+
+    {{-- Shipping Section --}}
+    <div id="shippingDetails"
+         style="display: {{ old('ship_different') ? 'block' : 'none' }};">
+
+        <div class="full-width">
+            <label>Shipping Address 1 *</label>
+            <input type="text" 
+                   name="ship_address1" 
+                   value="{{ old('ship_address1') }}">
+            @error('ship_address1')
+                <small style="color:red">{{ $message }}</small>
+            @enderror
+        </div>
+
+        <div class="full-width">
+            <label>Shipping Address 2</label>
+            <input type="text" 
+                   name="ship_address2" 
+                   value="{{ old('ship_address2') }}">
+        </div>
+
+        <div>
+            <label>Shipping City *</label>
+            <input type="text" 
+                   name="ship_city" 
+                   value="{{ old('ship_city') }}">
+            @error('ship_city')
+                <small style="color:red">{{ $message }}</small>
+            @enderror
+        </div>
+
+        <div>
+            <label>Shipping Country *</label>
+            <input type="text" 
+                   name="ship_country" 
+                   value="{{ old('ship_country') }}">
+            @error('ship_country')
+                <small style="color:red">{{ $message }}</small>
+            @enderror
+        </div>
+
+        <div>
+            <label>Shipping ZIP *</label>
+            <input type="text" 
+                   name="ship_zip" 
+                   value="{{ old('ship_zip') }}">
+            @error('ship_zip')
+                <small style="color:red">{{ $message }}</small>
+            @enderror
+        </div>
+
+        <div>
+            <label>Shipping Phone *</label>
+            <input type="text" 
+                   name="ship_phone" 
+                   value="{{ old('ship_phone') }}">
+            @error('ship_phone')
+                <small style="color:red">{{ $message }}</small>
+            @enderror
+        </div>
+
+    </div>
+
+    <button type="submit">Place Order</button>
+
+</form>
+
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary">
+    <h2>Your Order</h2>
+
+@php
+    // Get quantity from URL (default = 1)
+    $quantity = request()->get('quantity', 1);
+
+    $originalPrice = $product->price;
+
+    // Discount Calculation
+    if ($product->discount_type == 'rate') {
+        $discountValue = ($originalPrice * $product->discount_rate) / 100;
+    }
+    elseif ($product->discount_type == 'amount') {
+        $discountValue = $product->discount_amount;
+    }
+    else {
+        $discountValue = 0;
+    }
+
+    // Prevent discount from exceeding price
+    $discountValue = min($discountValue, $originalPrice);
+
+    // Final price per unit
+    $discountedPrice = $originalPrice - $discountValue;
+
+    // Subtotal based on quantity
+    $subTotal = $discountedPrice * $quantity;
+@endphp
+
+<table>
+    <tr>
+        <th>Product</th>
+        <th>Qty</th>
+        <th>Total</th>
+    </tr>
+
+    <tr>
+        <td>{{ $product->name }}</td>
+        <td>{{ $quantity }}</td>
+        <td>Rs. {{ number_format($subTotal, 2) }}</td>
+    </tr>
+
+    {{-- Discount Row --}}
+    @if($discountValue > 0)
+    <tr>
+        <td>Discount</td>
+        <td></td>
+        <td style="color: green;">
+            - Rs. {{ number_format($discountValue * $quantity, 2) }}
+        </td>
+    </tr>
+    @endif
+
+    <tr>
+        <td>Shipping</td>
+        <td></td>
+        <td>Free Shipping</td>
+    </tr>
+
+    <tr class="total-row">
+        <td>Total</td>
+        <td></td>
+        <td>
+            Rs. {{ number_format($subTotal, 2) }}
+        </td>
+    </tr>
+
+</table>
+
+<div class="payment-method">
+    <label>
+        <input type="radio" name="payment" value="cod" checked>
+        Cash on Delivery
+    </label>
+
+    <label>
+        <input type="radio" name="payment" value="opayo">
+        Opayo
+    </label>
+</div>
+
+<button class="place-order">
+    Place Order
+</button>
+
+</div>
+
+
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const checkbox = document.getElementById("different-address");
+    const shippingDetails = document.getElementById("shippingDetails");
+
+    shippingDetails.style.display = "none";
+
+    checkbox.addEventListener("change", function() {
+        shippingDetails.style.display = this.checked ? "grid" : "none";
+    });
+
+});
+</script>
+
 @endsection
+
+
+ 
+
+
+
+
+

@@ -60,8 +60,8 @@
 
                         <h5>
                             @if($product->discount_type != 'none')
-                            <del>$ {{ number_format($product->price, 2) }}</del>
-                            $ {{ number_format(
+                            <del>Rs. {{ number_format($product->price, 2) }}</del>
+                            Rs. {{ number_format(
                             $product->price - ($product->discount_type == 'rate'
                             ? ($product->price * $product->discount_rate / 100)
                             : $product->discount_amount),2) }}
@@ -107,7 +107,7 @@
                                     <li>
                                         <div class="form-group quantity-box">
                                             <label class="control-label">Quantity</label>
-                                            <input class="form-control" value="0" min="0" max="20" type="number">
+                                            <input class="form-control" id="productQuantity" value="1" min="1" max="20" type="number">
                                         </div>
                                     </li>
                                 </ul>
@@ -115,7 +115,7 @@
                                 <div class="price-box-bar">
                                     <div class="cart-and-bay-btn">
                                        @if(session()->has('client_id'))
-    <a class="btn hvr-hover" href="{{ route('delivery.info', $product->id) }}"
+    <a class="btn hvr-hover" id="buyButton" href="javascript:void(0);"
        @if($product->quantity == 0) disabled style="pointer-events:none; opacity:0.5;" @endif>
        Buy
     </a>
@@ -326,5 +326,22 @@
         </div>
     </div>
     <!-- End Cart -->
+
+    <script>
+document.getElementById("buyButton").addEventListener("click", function () {
+
+    let quantity = document.getElementById("productQuantity").value;
+
+    let productId = "{{ $product->id }}";
+
+    let url = "{{ route('delivery.info', ':id') }}";
+    url = url.replace(':id', productId);
+
+    // Add quantity as query parameter
+    window.location.href = url + "?quantity=" + quantity;
+
+});
+</script>
+
 
 @endsection

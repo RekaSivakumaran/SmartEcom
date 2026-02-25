@@ -150,5 +150,12 @@ Route::post('/client/login', [ClientController::class, 'login'])
 
 Route::post('/client/logout', [ClientController::class, 'logout'])->name('client.logout');
 
-Route::get('/delivery-info/{product}', [ClientController::class, 'showDeliveryInfo'])
-     ->name('delivery.info');
+// Route::get('/delivery-info/{product}', [ClientController::class, 'showDeliveryInfo'])
+//      ->name('delivery.info');
+
+     Route::get('/delivery-info/{id}', [ClientController::class, 'showDeliveryInfo'])
+    ->name('delivery.info');
+
+
+     Route::post('/single-order', [ClientController::class, 'storeSingle'])
+    ->name('order.single');
