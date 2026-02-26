@@ -1,6 +1,14 @@
 @extends('Layout.client')
 
 @section('content')
+
+<style>
+#checkoutBtn:hover {
+    color: #ffffff;       /* text white on hover */
+    background-color: #0056b3; /* optional background darken */
+    transition: all 0.3s ease;
+}
+</style>
 <div class="all-title-box">
     <div class="container">
         <h2>Cart</h2>
@@ -44,11 +52,11 @@
                     <h3>Order summary</h3>
                     <div class="d-flex">
                         <h4>Sub Total</h4>
-                        <div class="ml-auto font-weight-bold" id="subTotal">$ 0.00</div>
+                        <div class="ml-auto font-weight-bold" id="subTotal">RS. 0.00</div>
                     </div>
                     <div class="d-flex">
                         <h4>Discount</h4>
-                        <div class="ml-auto font-weight-bold" id="discount">$ 0.00</div>
+                        <div class="ml-auto font-weight-bold" id="discount">Rs. 0.00</div>
                     </div>
                     <hr class="my-1">
                     <div class="d-flex">
@@ -58,17 +66,40 @@
                     <hr>
                     <div class="d-flex gr-total">
                         <h5>Grand Total</h5>
-                        <div class="ml-auto h5 font-weight-bold" id="grandTotal">$ 0.00</div>
+                        <div class="ml-auto h5 font-weight-bold" id="grandTotal">Rs. 0.00</div>
                     </div>
                     <hr>
                 </div>
             </div>
-            <div class="col-12 d-flex shopping-box">
-                <a href="{{ url('checkout') }}" class="ml-auto btn hvr-hover" id="checkoutBtn">Checkout</a>
-            </div>
+
+            <div class="col-12 d-flex shopping-box justify-content-end">
+    <form id="checkoutForm" method="GET" action="{{ route('delivery.info.cart') }}">
+        <input type="hidden" name="cartData" id="cartData">
+        <button type="submit" class="ml-auto btn hvr-hover" id="checkoutBtn">Checkout</button>
+    </form>
+</div>
+
+            <!-- <div class="col-12 d-flex shopping-box">
+                <a href="{{ route('delivery.info.cart') }}" class="ml-auto btn hvr-hover" id="checkoutBtn">Checkout</a>
+            </div> -->
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        document.getElementById('cartData').value = JSON.stringify(cart);
+
+        const checkoutForm = document.getElementById('checkoutForm');
+        checkoutForm.addEventListener('submit', function(e) {
+            if(cart.length === 0) {
+                e.preventDefault();
+                alert('Your cart is empty!');
+            }
+        });
+    });
+</script>
 
 <script>
 (function() {
@@ -136,9 +167,9 @@
                     </tr>
                 `;
                 
-                subTotalEl.innerText = "$ 0.00";
-                discountEl.innerText = "$ 0.00";
-                grandTotalEl.innerText = "$ 0.00";
+                subTotalEl.innerText = "Rs. 0.00";
+                discountEl.innerText = "Rs. 0.00";
+                grandTotalEl.innerText = "Rs. 0.00";
                 
                 if (checkoutBtn) {
                     checkoutBtn.style.display = 'none';
@@ -178,7 +209,7 @@
                         <a href="#">${product.name || 'Product Name'}</a>
                     </td>
                     <td class="price-pr">
-                        <p>$ ${price.toFixed(2)}</p>
+                        <p>Rs. ${price.toFixed(2)}</p>
                     </td>
                     <td class="quantity-box">
                         <input type="number" 
@@ -191,7 +222,7 @@
                                style="width: 80px;">
                     </td>
                     <td class="total-pr">
-                        <p>$ ${total.toFixed(2)}</p>
+                        <p>Rs. ${total.toFixed(2)}</p>
                     </td>
                     <td class="remove-pr">
                         <a href="#" class="remove-item" data-index="${index}">
@@ -206,9 +237,9 @@
             let discount = 0;
             let grandTotal = subTotal - discount;
             
-            subTotalEl.innerText = "$ " + subTotal.toFixed(2);
-            discountEl.innerText = "$ " + discount.toFixed(2);
-            grandTotalEl.innerText = "$ " + grandTotal.toFixed(2);
+            subTotalEl.innerText = "Rs. " + subTotal.toFixed(2);
+            discountEl.innerText = "Rs. " + discount.toFixed(2);
+            grandTotalEl.innerText = "Rs. " + grandTotal.toFixed(2);
             
             console.log('Cart rendered. SubTotal:', subTotal);
         }

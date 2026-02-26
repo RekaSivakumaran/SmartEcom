@@ -159,3 +159,6 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
 
      Route::post('/single-order', [ClientController::class, 'storeSingle'])
     ->name('order.single');
+
+Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
+    ->name('delivery.info.cart');

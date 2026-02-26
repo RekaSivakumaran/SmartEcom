@@ -166,7 +166,7 @@ input {
     @csrf
 
     {{-- SHOW ALL ERRORS --}}
-    @if ($errors->any())
+    <!-- @if ($errors->any())
         <div style="color:red; margin-bottom:15px;">
             <ul>
                 @foreach ($errors->all() as $error)
@@ -174,9 +174,12 @@ input {
                 @endforeach
             </ul>
         </div>
-    @endif
+    @endif -->
 
-
+    @foreach($products as $product)
+        <input type="hidden" name="products[{{ $product['id'] }}][id]" value="{{ $product['id'] }}">
+        <input type="hidden" name="products[{{ $product['id'] }}][quantity]" value="{{ $product['quantity'] }}">
+    @endforeach
     <div>
         <label>First Name *</label>
         <input type="text" 
@@ -346,8 +349,11 @@ input {
         </div>
 
     </div>
+<button class="place-order">
+    Place Order
+</button>
 
-    <button type="submit">Place Order</button>
+    <!-- <button type="submit">Place Order</button> -->
 
 </form>
 
@@ -355,90 +361,77 @@ input {
 
     <!-- Order Summary -->
     <div class="order-summary">
-    <h2>Your Order</h2>
+        <h2>Your order</h2>
 
-@php
-    // Get quantity from URL (default = 1)
-    $quantity = request()->get('quantity', 1);
+        @php $total = 0; @endphp
+        <table>
+            <tr>
+                <th>Products</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
 
-    $originalPrice = $product->price;
+            @foreach($products as $product)
+                @php
+                    $quantity = $product['quantity'] ?? 1;
+                    $originalPrice = $product['price'];
 
-    // Discount Calculation
-    if ($product->discount_type == 'rate') {
-        $discountValue = ($originalPrice * $product->discount_rate) / 100;
-    }
-    elseif ($product->discount_type == 'amount') {
-        $discountValue = $product->discount_amount;
-    }
-    else {
-        $discountValue = 0;
-    }
+                    if ($product['discount_type'] == 'rate') {
+                        $discountValue = ($originalPrice * $product['discount_rate']) / 100;
+                    } elseif ($product['discount_type'] == 'amount') {
+                        $discountValue = $product['discount_amount'];
+                    } else {
+                        $discountValue = 0;
+                    }
 
-    // Prevent discount from exceeding price
-    $discountValue = min($discountValue, $originalPrice);
+                    $discountValue = min($discountValue, $originalPrice);
+                    $discountedPrice = $originalPrice - $discountValue;
+                    $subTotal = $discountedPrice * $quantity;
+                    $total += $subTotal;
+                @endphp
 
-    // Final price per unit
-    $discountedPrice = $originalPrice - $discountValue;
+                <tr>
+                    <td>{{ $product['name'] }}</td>
+                    <td>{{ $quantity }}</td>
+                    <td>Rs. {{ number_format($subTotal, 2) }}</td>
+                </tr>
 
-    // Subtotal based on quantity
-    $subTotal = $discountedPrice * $quantity;
-@endphp
+                @if($discountValue > 0)
+                <tr>
+                    <td>Discount</td>
+                    <td></td>
+                    <td style="color:green;">- Rs. {{ number_format($discountValue * $quantity, 2) }}</td>
+                </tr>
+                @endif
+            @endforeach
 
-<table>
-    <tr>
-        <th>Product</th>
-        <th>Qty</th>
-        <th>Total</th>
-    </tr>
+            <tr>
+                <td>Shopping: </td>
+                <td></td>
+                <td>Free Shipping</td>
+            </tr>
 
-    <tr>
-        <td>{{ $product->name }}</td>
-        <td>{{ $quantity }}</td>
-        <td>Rs. {{ number_format($subTotal, 2) }}</td>
-    </tr>
+            <tr class="total-row">
+                <td>Total</td>
+                <td></td>
+                <td>Rs. {{ number_format($total, 2) }}</td>
+            </tr>
+        </table>
 
-    {{-- Discount Row --}}
-    @if($discountValue > 0)
-    <tr>
-        <td>Discount</td>
-        <td></td>
-        <td style="color: green;">
-            - Rs. {{ number_format($discountValue * $quantity, 2) }}
-        </td>
-    </tr>
-    @endif
-
-    <tr>
-        <td>Shipping</td>
-        <td></td>
-        <td>Free Shipping</td>
-    </tr>
-
-    <tr class="total-row">
-        <td>Total</td>
-        <td></td>
-        <td>
-            Rs. {{ number_format($subTotal, 2) }}
-        </td>
-    </tr>
-
-</table>
-
-<div class="payment-method">
-    <label>
-        <input type="radio" name="payment" value="cod" checked>
-        Cash on Delivery
-    </label>
-
-    <label>
-        <input type="radio" name="payment" value="opayo">
-        Opayo
-    </label>
-</div>
-
-<button class="place-order">
+        <div class="payment-method">
+            <label>
+                <input type="radio" name="payment" value="cod" checked>
+                Cash on Delivery
+            </label>
+            <label>
+                <input type="radio" name="payment" value="opayo">
+                Opayo
+            </label>
+        </div>
+   
+<!-- <button class="place-order">
     Place Order
-</button>
+</button> -->
 
 </div>
 

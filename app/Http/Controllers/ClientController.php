@@ -7,13 +7,13 @@ use App\Models\MainCategoryModel;
 use App\Models\ProductModel;
 use App\Models\BrandModel;
 use App\Models\CustomerModel;
-use App\Models\OrderModel;
-use App\Models\OrderItemModel;
+use App\Models\orderModel;
+use App\Models\orderItemModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Support\Facades\DB;
 
 class ClientController extends Controller
 {
@@ -200,112 +200,317 @@ public function logout(Request $request)
 //     return view('client.DeliveryInfo', compact('product'));
 // }
 
-public function showDeliveryInfo($productId, Request $request)
+public function showDeliveryInfo(Request $request, $productId = null)
 {
-    $quantity = $request->quantity ?? 1;
+if ($productId) {
+        // Buy Now: single product
+        $product = ProductModel::findOrFail($productId);
+        $quantity = $request->quantity ?? 1;
 
-    $product = ProductModel::findOrFail($productId);
+        $products = [
+            [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'discount_type' => $product->discount_type,
+                'discount_rate' => $product->discount_rate,
+                'discount_amount' => $product->discount_amount,
+                'quantity' => $quantity,
+            ]
+        ];
+    } else {
+        // $products = json_decode($request->cartData ?? '[]', true);
 
-    return view('client.DeliveryInfo', compact('product', 'quantity'));
-}
-
-
-
-public function storeSingle(Request $request)
-{
-    $validated = $request->validate([
-
-        // Billing Required
-        'first_name' => 'required|string|max:100',
-        'last_name' => 'required|string|max:100',
-        'address1' => 'required|string|max:255',
-        'city' => 'required|string|max:100',
-        'country' => 'required|string|max:100',
-        'postcode' => 'required|string|max:20',
-        'phone' => 'required|string|max:20',
-        'email' => 'required|email|max:255',
-
-        // Shipping Only If Checked
-        'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
-        'ship_city' => 'required_if:ship_different,1|nullable|string|max:100',
-        'ship_country' => 'required_if:ship_different,1|nullable|string|max:100',
-        'ship_zip' => 'required_if:ship_different,1|nullable|string|max:20',
-        'ship_phone' => 'required_if:ship_different,1|nullable|string|max:20',
-    ]);
-
-    DB::beginTransaction();
-
-    $product = ProductModel::lockForUpdate()->findOrFail($request->product_id);
+        // if(empty($products)) {
+        //     return redirect()->route('products.all')->with('error', 'Your cart is empty!');
+        //     }
+        //$products = session()->get('cart', []);
 
 
-    if ($product->quantity <= 0) {
-            return back()->with('error', 'Product is out of stock.');
-        }
 
+
+        $cart = json_decode($request->cartData ?? '[]', true);
+
+    if(empty($cart)) {
+        return redirect()->route('products.all')->with('error', 'Your cart is empty!');
+    }
+
+    $products = [];
+    $subTotal = 0;
+
+    foreach($cart as $item) {
+        $product = ProductModel::find($item['id']);
+        if(!$product) continue;
+
+        $quantity = $item['quantity'] ?? 1;
          $originalPrice = $product->price;
 
-        if ($product->discount_type == 'rate') {
-            $discountValue = $originalPrice * $product->discount_rate / 100;
-        } elseif ($product->discount_type == 'amount') {
-            $discountValue = $product->discount_amount;
-        } else {
-            $discountValue = 0;
-        }
+        // // Discount logic from DB
+        // if ($product->discount_type == 'rate') {
+        //     $discountValue = ($originalPrice * $product->discount_rate) / 100;
+        // } elseif ($product->discount_type == 'amount') {
+        //     $discountValue = $product->discount_amount;
+        // } else {
+        //     $discountValue = 0;
+        // }
 
-        $discountValue = min($discountValue, $originalPrice);
-        $finalPrice = $originalPrice - $discountValue;
+        // $discountValue = min($discountValue, $originalPrice);
+        // $discountedPrice = $originalPrice - $discountValue;
+        // $total = $discountedPrice * $quantity;
+
+        // $subTotal += $total;
+
+        $products[] = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $originalPrice,
+            'discount_type' => $product->discount_type,
+            'discount_rate' => $product->discount_rate,
+            'discount_amount' => $product->discount_amount,
+            'quantity' => $quantity,
+            // 'discounted_price' => $discountedPrice,
+            // 'total' => $total,
+            'img' => $product->img ?? null,
+        ];
 
 
-    DB::beginTransaction();
 
-    try {
 
-        $total = 0;
-        foreach ($cart as $item) {
-            $total += $item['price'] * $item['quantity'];
-        }
-
-        $order = OrderModel::create([
-            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-            'email' => $validated['email'],
-            'mobile_number' => $validated['phone'],
-
-            'billing_address1' => $validated['address1'],
-            'billing_address2' => $request->address2,
-            'billing_city' => $validated['city'],
-            'billing_country' => $validated['country'],
-            'billing_postcode' => $validated['postcode'],
-
-            'shipping_address1' => $request->ship_different ? $validated['ship_address1'] : null,
-            'shipping_address2' => $request->ship_different ? $request->ship_address2 : null,
-            'shipping_city' => $request->ship_different ? $validated['ship_city'] : null,
-            'shipping_country' => $request->ship_different ? $validated['ship_country'] : null,
-            'shipping_postcode' => $request->ship_different ? $validated['ship_zip'] : null,
-
-            'status' => 'Pending',
-            'payment_status' => 'Pending',
-            'total' => $finalPrice
-        ]);
-
-         OrderItemModel::create([
-            'order_id' => $order->id,
-            'product_id' => $product->id,
-            'image_path' => $product->image,
-            'quantity' => 1,
-            'price' => $finalPrice,
-            'total' => $finalPrice,
-        ]);
-
-        DB::commit();
-
-        return redirect()->route('home')
-            ->with('success', 'Order placed successfully!');
-
-    } catch (\Exception $e) {
-
-        DB::rollback();
-        return back()->with('error', 'Something went wrong.');
+        
     }
+    }
+
+    return view('client.DeliveryInfo', compact('products'));
+
+
+
+    // $quantity = $request->quantity ?? 1;
+
+    // $product = ProductModel::findOrFail($productId);
+
+    // return view('client.DeliveryInfo', compact('product', 'quantity'));
 }
+
+
+
+// public function storeSingle(Request $request)
+// {
+//     $validated = $request->validate([
+//         'first_name' => 'required|string|max:100',
+//         'last_name'  => 'required|string|max:100',
+//         'address1'   => 'required|string|max:255',
+//         'city'       => 'required|string|max:100',
+//         'country'    => 'required|string|max:100',
+//         'postcode'   => 'required|string|max:20',
+//         'phone'      => 'required|string|max:20',
+//         'email'      => 'required|email|max:255',
+
+//         'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
+//         'ship_city'     => 'required_if:ship_different,1|nullable|string|max:100',
+//         'ship_country'  => 'required_if:ship_different,1|nullable|string|max:100',
+//         'ship_zip'      => 'required_if:ship_different,1|nullable|string|max:20',
+//         'ship_phone'   => 'required_if:ship_different,1|nullable|string|max:20',
+//     ]);
+
+//     DB::beginTransaction();
+
+//     try {
+//         $product = ProductModel::lockForUpdate()
+//             ->findOrFail($request->product_id);
+
+//         if ($product->quantity <= 0) {
+//             DB::rollBack();
+//             return back()->with('error', 'Product is out of stock.');
+//         }
+
+//         // Price calculation
+//         $originalPrice = $product->price;
+
+//         if ($product->discount_type === 'rate') {
+//             $discountValue = ($originalPrice * $product->discount_rate) / 100;
+//         } elseif ($product->discount_type === 'amount') {
+//             $discountValue = $product->discount_amount;
+//         } else {
+//             $discountValue = 0;
+//         }
+
+//         $discountValue = min($discountValue, $originalPrice);
+//         $finalPrice = $originalPrice - $discountValue;
+
+
+//         $lastOrder = OrderModel::lockForUpdate()
+//         ->orderBy('id', 'desc')
+//         ->first();
+
+//         $nextNumber = $lastOrder
+//         ? ((int) substr($lastOrder->bill_no, 2)) + 1
+//         : 1;
+
+//         $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+//             Log::info('Storing orders db:', $request->session()->all());
+
+//         // Create order
+//         $order = orderModel::create([
+//             'bill_no' => $billNo,
+//             'name' => $validated['first_name'].' '.$validated['last_name'],
+//             'email' => $validated['email'],
+//             'mobile_number' => $validated['phone'],
+
+//             'billing_address1' => $validated['address1'],
+//             'billing_address2' => $request->address2,
+//             'billing_city' => $validated['city'],
+//             'billing_country' => $validated['country'],
+//             'billing_postcode' => $validated['postcode'],
+
+//             'shipping_address1' => $request->ship_different ? $validated['ship_address1'] : null,
+//             'shipping_address2' => $request->ship_different ? $request->ship_address2 : null,
+//             'shipping_city' => $request->ship_different ? $validated['ship_city'] : null,
+//             'shipping_country' => $request->ship_different ? $validated['ship_country'] : null,
+//             'shipping_postcode' => $request->ship_different ? $validated['ship_zip'] : null,
+
+//             'status' => 'Pending',
+//             'payment_status' => 'Pending',
+//             'total' => $finalPrice,
+//         ]);
+
+//             Log::info('Storing orders item db:', $request->session()->all());
+
+//         orderItemModel::create([
+//             'order_id' => $order->id,
+//             'product_id' => $product->id,
+//             'image_path' => $product->image,
+//             'quantity' => 1,
+//             'price' => $finalPrice,
+//             'total' => $finalPrice,
+//         ]);
+
+//         // Reduce stock
+//         $product->quantity -= 1;
+//         $product->save();
+
+//         DB::commit();
+
+//             Log::info('Order successfully:', $request->session()->all());
+
+//         return redirect('/')
+//             ->with('success', 'Order placed successfully!');
+
+//     } catch (Exception $e) {
+//         DB::rollBack();
+//             Log::info('Something went wrong.' + $e, $request->session()->all());
+//         return back()->with('error', 'Something went wrong.');
+//     }
+// }
+
+
+ public function storeSingle(Request $request)
+    {
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:100',
+            'last_name'  => 'required|string|max:100',
+            'address1'   => 'required|string|max:255',
+            'city'       => 'required|string|max:100',
+            'country'    => 'required|string|max:100',
+            'postcode'   => 'required|string|max:20',
+            'phone'      => 'required|string|max:20',
+            'email'      => 'required|email|max:255',
+
+            'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
+            'ship_city'     => 'required_if:ship_different,1|nullable|string|max:100',
+            'ship_country'  => 'required_if:ship_different,1|nullable|string|max:100',
+            'ship_zip'      => 'required_if:ship_different,1|nullable|string|max:20',
+            'ship_phone'   => 'required_if:ship_different,1|nullable|string|max:20',
+        ]);
+
+        $products = $request->products ?? [];
+        if (empty($products)) {
+            return back()->with('error', 'No products selected.');
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $totalPrice = 0;
+
+            $orderItems = [];
+            foreach ($products as $productId => $data) {
+                $product = ProductModel::lockForUpdate()->findOrFail($productId);
+                $quantity = $data['quantity'] ?? 1;
+
+                if ($product->quantity < $quantity) {
+                    DB::rollBack();
+                    return back()->with('error', "Product {$product->name} is out of stock.");
+                }
+
+                // Discount
+                $originalPrice = $product->price;
+                if ($product->discount_type === 'rate') {
+                    $discountValue = ($originalPrice * $product->discount_rate) / 100;
+                } elseif ($product->discount_type === 'amount') {
+                    $discountValue = $product->discount_amount;
+                } else {
+                    $discountValue = 0;
+                }
+                $discountValue = min($discountValue, $originalPrice);
+                $finalPrice = ($originalPrice - $discountValue) * $quantity;
+
+                $totalPrice += $finalPrice;
+
+                $orderItems[] = [
+                    'product_id' => $product->id,
+                    'quantity' => $quantity,
+                    'price' => $originalPrice,
+                    'total' => $finalPrice,
+                    'image_path' => $product->image ?? null,
+                ];
+
+                // Reduce stock
+                $product->quantity -= $quantity;
+                $product->save();
+            }
+
+            // Generate bill_no
+            $lastOrder = OrderModel::lockForUpdate()->orderBy('id', 'desc')->first();
+            $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
+            $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+            // Create order
+            $order = OrderModel::create([
+                'bill_no' => $billNo,
+                'name' => $validated['first_name'].' '.$validated['last_name'],
+                'email' => $validated['email'],
+                'mobile_number' => $validated['phone'],
+                'billing_address1' => $validated['address1'],
+                'billing_address2' => $request->address2,
+                'billing_city' => $validated['city'],
+                'billing_country' => $validated['country'],
+                'billing_postcode' => $validated['postcode'],
+                'shipping_address1' => $request->ship_different ? $validated['ship_address1'] : null,
+                'shipping_address2' => $request->ship_different ? $request->ship_address2 : null,
+                'shipping_city' => $request->ship_different ? $validated['ship_city'] : null,
+                'shipping_country' => $request->ship_different ? $validated['ship_country'] : null,
+                'shipping_postcode' => $request->ship_different ? $validated['ship_zip'] : null,
+                'shipping_phone' => $request->ship_different ? $validated['ship_phone'] : null,
+                'status' => 'Pending',
+                'payment_status' => 'Pending',
+                'total' => $totalPrice,
+            ]);
+
+            // Create order items
+            foreach ($orderItems as $item) {
+                OrderItemModel::create(array_merge($item, ['order_id' => $order->id]));
+            }
+
+            DB::commit();
+
+            return redirect('/client')->with('success', 'Order placed successfully!');        } catch (Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Something went wrong: '.$e->getMessage());
+        }
+    }
+
+
+
 
 }
