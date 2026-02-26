@@ -164,7 +164,13 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
 Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
     ->name('delivery.info.cart');
 
-    Route::post('/stripe/payment-intent', [PaymentController::class, 'createPaymentIntent'])->name('stripe.payment-intent');
+    Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent'])
+    ->name('payment.intent');
 
-// Order handle after payment
-Route::post('/order/success', [PaymentController::class, 'handleOrder'])->name('order.success');
+Route::post('/payment/checkout-session', [PaymentController::class, 'createCheckoutSession'])->name('payment.checkout.session');
+Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
+Route::get('/payment/cancel',  [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+
+Route::get('/client/orderstatus', function () {
+    return view('Client.orderstatus');
+})->name('order.status');

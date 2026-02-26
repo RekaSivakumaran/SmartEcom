@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MainCategoryModel;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class MainCategoryController extends Controller
 {
