@@ -305,7 +305,7 @@ input {
             </label>
             <label>
                 <input type="radio" name="payment" value="card">
-                💳 Card Payment (Stripe)
+                💳 Card Payment 
             </label>
         </div>
 

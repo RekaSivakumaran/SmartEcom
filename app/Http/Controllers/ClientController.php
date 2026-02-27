@@ -404,113 +404,114 @@ if ($productId) {
 // }
 
 
- public function storeSingle(Request $request)
-    {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:100',
-            'last_name'  => 'required|string|max:100',
-            'address1'   => 'required|string|max:255',
-            'city'       => 'required|string|max:100',
-            'country'    => 'required|string|max:100',
-            'postcode'   => 'required|string|max:20',
-            'phone'      => 'required|string|max:20',
-            'email'      => 'required|email|max:255',
+public function storeSingle(Request $request)
+{
+    $validated = $request->validate([
+        'first_name' => 'required|string|max:100',
+        'last_name'  => 'required|string|max:100',
+        'address1'   => 'required|string|max:255',
+        'city'       => 'required|string|max:100',
+        'country'    => 'required|string|max:100',
+        'postcode'   => 'required|string|max:20',
+        'phone'      => 'required|string|max:20',
+        'email'      => 'required|email|max:255',
+    ]);
 
-            'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
-            'ship_city'     => 'required_if:ship_different,1|nullable|string|max:100',
-            'ship_country'  => 'required_if:ship_different,1|nullable|string|max:100',
-            'ship_zip'      => 'required_if:ship_different,1|nullable|string|max:20',
-            'ship_phone'   => 'required_if:ship_different,1|nullable|string|max:20',
-        ]);
+    $products = $request->products;
 
-        $products = $request->products ?? [];
-        if (empty($products)) {
-            return back()->with('error', 'No products selected.');
-        }
-
-        DB::beginTransaction();
-
-        try {
-            $totalPrice = 0;
-
-            $orderItems = [];
-            foreach ($products as $productId => $data) {
-                $product = ProductModel::lockForUpdate()->findOrFail($productId);
-                $quantity = $data['quantity'] ?? 1;
-
-                if ($product->quantity < $quantity) {
-                    DB::rollBack();
-                    return back()->with('error', "Product {$product->name} is out of stock.");
-                }
-
-                // Discount
-                $originalPrice = $product->price;
-                if ($product->discount_type === 'rate') {
-                    $discountValue = ($originalPrice * $product->discount_rate) / 100;
-                } elseif ($product->discount_type === 'amount') {
-                    $discountValue = $product->discount_amount;
-                } else {
-                    $discountValue = 0;
-                }
-                $discountValue = min($discountValue, $originalPrice);
-                $finalPrice = ($originalPrice - $discountValue) * $quantity;
-
-                $totalPrice += $finalPrice;
-
-                $orderItems[] = [
-                    'product_id' => $product->id,
-                    'quantity' => $quantity,
-                    'price' => $originalPrice,
-                    'total' => $finalPrice,
-                    'image_path' => $product->image ?? null,
-                ];
-
-                // Reduce stock
-                $product->quantity -= $quantity;
-                $product->save();
-            }
-
-            // Generate bill_no
-            $lastOrder = OrderModel::lockForUpdate()->orderBy('id', 'desc')->first();
-            $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
-            $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-
-            // Create order
-            $order = OrderModel::create([
-                'bill_no' => $billNo,
-                'name' => $validated['first_name'].' '.$validated['last_name'],
-                'email' => $validated['email'],
-                'mobile_number' => $validated['phone'],
-                'billing_address1' => $validated['address1'],
-                'billing_address2' => $request->address2,
-                'billing_city' => $validated['city'],
-                'billing_country' => $validated['country'],
-                'billing_postcode' => $validated['postcode'],
-                'shipping_address1' => $request->ship_different ? $validated['ship_address1'] : null,
-                'shipping_address2' => $request->ship_different ? $request->ship_address2 : null,
-                'shipping_city' => $request->ship_different ? $validated['ship_city'] : null,
-                'shipping_country' => $request->ship_different ? $validated['ship_country'] : null,
-                'shipping_postcode' => $request->ship_different ? $validated['ship_zip'] : null,
-                'shipping_phone' => $request->ship_different ? $validated['ship_phone'] : null,
-                'status' => 'Pending',
-                'payment_status' => 'Pending',
-                'total' => $totalPrice,
-            ]);
-
-            // Create order items
-            foreach ($orderItems as $item) {
-                OrderItemModel::create(array_merge($item, ['order_id' => $order->id]));
-            }
-
-            DB::commit();
-
-            return redirect('/client')->with('success', 'Order placed successfully!');        } catch (Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Something went wrong: '.$e->getMessage());
-        }
+    if (!$products || count($products) == 0) {
+        return back()->with('error', 'No products selected.');
     }
 
+    DB::beginTransaction();
 
+    try {
 
+        $totalPrice = 0;
+        $orderItems = [];
+
+        foreach ($products as $data) {
+
+            $product = ProductModel::lockForUpdate()->findOrFail($data['id']);
+            $quantity = $data['quantity'];
+
+            if ($product->quantity < $quantity) {
+                DB::rollBack();
+                return back()->with('error', "{$product->name} stock இல்லை.");
+            }
+
+            $originalPrice = $product->price;
+            $discount = 0;
+
+            if ($product->discount_type === 'rate') {
+                $discount = ($originalPrice * $product->discount_rate) / 100;
+            } elseif ($product->discount_type === 'amount') {
+                $discount = $product->discount_amount;
+            }
+
+            $discount = min($discount, $originalPrice);
+            $finalPrice = ($originalPrice - $discount) * $quantity;
+
+            $totalPrice += $finalPrice;
+
+            $orderItems[] = [
+                'product_id' => $product->id,
+                'quantity'   => $quantity,
+                'price'      => $originalPrice,
+                'total'      => $finalPrice,
+                'image_path' => $product->image ?? null,
+            ];
+
+            $product->quantity -= $quantity;
+            $product->save();
+        }
+
+        // Bill Number Generate
+        $lastOrder = OrderModel::orderBy('id','desc')->first();
+        $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
+        $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        $order = OrderModel::create([
+            'bill_no' => $billNo,
+            'name' => $validated['first_name'].' '.$validated['last_name'],
+            'email' => $validated['email'],
+            'mobile_number' => $validated['phone'],
+            'billing_address1' => $validated['address1'],
+            'billing_city' => $validated['city'],
+            'billing_country' => $validated['country'],
+            'billing_postcode' => $validated['postcode'],
+            'status' => 'Pending',
+            'payment_status' => 'Pending',
+            'total' => $totalPrice,
+        ]);
+
+        foreach ($orderItems as $item) {
+            OrderItemModel::create(array_merge($item, [
+                'order_id' => $order->id
+            ]));
+        }
+
+        DB::commit();
+
+        return redirect()->route('order.status', ['order' => $order->id])
+            ->with('success', 'Order placed successfully!');
+
+    } catch (\Exception $e) {
+
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong.');
+    }
+}
+
+public function orderStatus($order)
+{
+    $order = OrderModel::find($order);
+
+    if (!$order) {
+        return redirect()->route('home');
+    }
+
+    return view('Client.orderstatus', compact('order'));
+}
 
 }

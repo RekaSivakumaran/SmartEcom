@@ -171,6 +171,5 @@ Route::post('/payment/checkout-session', [PaymentController::class, 'createCheck
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('/payment/cancel',  [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
 
-Route::get('/client/orderstatus', function () {
-    return view('Client.orderstatus');
-})->name('order.status');
+Route::get('/client/orderstatus/{order}', [ClientController::class, 'orderStatus'])
+    ->name('order.status');

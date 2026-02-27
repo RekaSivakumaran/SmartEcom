@@ -56,36 +56,45 @@
 </style>
 
 <div class="order-container">
-    
-    {{-- Success Message --}}
-    @if(session('success'))
-        <div class="order-card success">
-            <h2>🎉 Order Placed Successfully!</h2>
-            <p>{{ session('success') }}</p>
 
-            <a href="{{ route('home') }}" class="btn">
-                Continue Shopping
-            </a>
-        </div>
-    @endif
+        @if(session('success'))
+<div class="order-card success">
+    <h2>🎉 Order Placed Successfully!</h2>
 
+    <p><strong>Bill No:</strong> {{ $order->bill_no }}</p>
+    <p><strong>Order ID:</strong> #{{ $order->id }}</p>
+    <p><strong>Total:</strong> Rs. {{ number_format($order->total,2) }}</p>
 
-    {{-- Failed Message --}}
-    @if(session('error'))
-        <div class="order-card failed">
-            <h2>❌ Order Failed!</h2>
-            <p>{{ session('error') }}</p>
+    <a href="{{ route('home') }}" class="btn">
+        Continue Shopping
+    </a>
+</div>
+@endif
 
-            <a href="{{ route('delivery.info') }}" class="btn">
-                Try Again
-            </a>
+<!-- @if(session('success'))
+    <div class="order-card success">
+        <h2>🎉 Order Placed Successfully!</h2>
 
-            <a href="{{ route('home') }}" class="btn secondary">
-                Continue Shopping
-            </a>
-        </div>
-    @endif
+        <p><strong>Bill No:</strong> {{ $order->bill_no }}</p>
+        <p><strong>Order ID:</strong> #{{ $order->id }}</p>
+        <p><strong>Total:</strong> Rs. {{ number_format($order->total,2) }}</p>
+
+        <a href="{{ route('home') }}" class="btn">
+            Continue Shopping
+        </a>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="order-card failed">
+        <h2>❌ Order Failed!</h2>
+        <p>{{ session('error') }}</p>
+
+        <a href="{{ route('home') }}" class="btn secondary">
+            Go Home
+        </a>
+    </div>
+@endif -->
 
 </div>
-
 @endsection
