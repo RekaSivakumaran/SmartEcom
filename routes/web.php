@@ -10,6 +10,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -162,3 +163,8 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
 
 Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
     ->name('delivery.info.cart');
+
+    Route::post('/stripe/payment-intent', [PaymentController::class, 'createPaymentIntent'])->name('stripe.payment-intent');
+
+// Order handle after payment
+Route::post('/order/success', [PaymentController::class, 'handleOrder'])->name('order.success');

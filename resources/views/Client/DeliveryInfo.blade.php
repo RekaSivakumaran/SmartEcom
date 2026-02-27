@@ -162,7 +162,8 @@ input {
     <div class="billing">
         <h2>Billing Details</h2>
 
-        <form method="POST" action="{{ route('order.single') }}">
+        <!-- <form method="POST" action="{{ route('order.single') }}"> -->
+            <form method="POST" id="checkout-form">
     @csrf
 
     {{-- SHOW ALL ERRORS --}}
@@ -420,14 +421,16 @@ input {
 
         <div class="payment-method">
             <label>
-                <input type="radio" name="payment" value="cod" checked>
+                <input type="radio" name="payment" value="cash" checked>
                 Cash on Delivery
             </label>
             <label>
-                <input type="radio" name="payment" value="opayo">
-                Opayo
+                <input type="radio" name="payment" value="card">
+                Card payment
             </label>
         </div>
+
+          
    
 <!-- <button class="place-order">
     Place Order
@@ -451,6 +454,131 @@ document.addEventListener("DOMContentLoaded", function() {
         shippingDetails.style.display = this.checked ? "grid" : "none";
     });
 
+});
+</script>
+
+<script src="https://js.stripe.com/v3/"></script>
+<!-- <script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const payButton = document.querySelector('button.place-order');
+
+    payButton.addEventListener("click", async function(e) {
+        e.preventDefault();
+
+        // Payment method check
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+        if(paymentMethod !== 'opayo'){
+            // COD selected
+            document.querySelector('form').submit();
+            return;
+        }
+
+        // Total amount from Blade variable
+        const totalAmount = {{ $total }};
+        const csrfToken = '{{ csrf_token() }}';
+
+        // Step 4.1: Create PaymentIntent
+        const response = await fetch('{{ route("stripe.payment-intent") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ total_amount: totalAmount })
+        });
+
+        const data = await response.json();
+        const clientSecret = data.clientSecret;
+
+        // Step 4.2: Stripe.js test payment
+        const stripe = Stripe('{{ env("STRIPE_KEY") }}');
+
+        const result = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: {
+                    number: '4242424242424242', // Test card
+                    exp_month: 12,
+                    exp_year: 2034,
+                    cvc: '123'
+                }
+            }
+        });
+
+        if(result.error){
+            alert('Payment Failed: ' + result.error.message);
+        } else if(result.paymentIntent.status === 'succeeded'){
+            alert('Payment Success!');
+
+            // Submit the form to handle order
+            document.querySelector('form').action = '{{ route("order.success") }}';
+            document.querySelector('form').submit();
+        }
+    });
+
+});
+</script> -->
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const stripe = Stripe('{{ env("STRIPE_KEY") }}'); // publishable key
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    const form = document.getElementById('checkout-form');
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+        // COD selected
+        if(paymentMethod === 'cash'){
+            form.action = '{{ route("order.single") }}';
+            form.submit();
+            return;
+        }
+        if(paymentType === 'card') {
+        const res = await fetch('{{ route("stripe.session") }}', {
+            method:'POST',
+            headers:{ 
+                'Content-Type':'application/json', 
+                'X-CSRF-TOKEN':'{{ csrf_token() }}' 
+            },
+            body: JSON.stringify({ products })
+        });
+        const data = await res.json();
+        const stripe = Stripe('{{ env("STRIPE_KEY") }}');
+        stripe.redirectToCheckout({ sessionId: data.id });
+    }
+
+        // // Stripe payment
+        // const totalAmount = 500; // change to dynamic total
+        // const csrfToken = '{{ csrf_token() }}';
+
+        // // Create PaymentIntent via backend
+        // const response = await fetch('{{ route("stripe.payment-intent") }}', {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+        //     body: JSON.stringify({ total_amount: totalAmount })
+        // });
+
+        // const data = await response.json();
+
+        // const result = await stripe.confirmCardPayment(data.clientSecret, {
+        //     payment_method: { card: card }
+        // });
+
+        // if(result.error){
+        //     document.getElementById('card-errors').textContent = result.error.message;
+        // } else if(result.paymentIntent.status === 'succeeded'){
+        //     alert('Payment Successful!');
+        //     form.action = '{{ route("order.success") }}';
+        //     form.submit();
+        // }
+    });
 });
 </script>
 
