@@ -173,3 +173,5 @@ Route::get('/payment/cancel',  [PaymentController::class, 'paymentCancel'])->nam
 
 Route::get('/client/orderstatus/{order}', [ClientController::class, 'orderStatus'])
     ->name('order.status');
+
+Route::post('/save-billing', [PaymentController::class, 'saveBillingDetails'])->name('billing.save');

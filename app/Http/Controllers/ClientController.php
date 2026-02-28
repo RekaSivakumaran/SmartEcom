@@ -415,13 +415,51 @@ public function storeSingle(Request $request)
         'postcode'   => 'required|string|max:20',
         'phone'      => 'required|string|max:20',
         'email'      => 'required|email|max:255',
+    ]);   
+
+    if($request->ship_different ?? 0)
+    {
+        $request->validate([       
+        'ship_different'=> 'nullable|boolean',
+        'ship_address1' => 'required_if:ship_different,1|string|max:255',
+        'ship_address2' => 'nullable|string|max:255',
+        'ship_city'     => 'required_if:ship_different,1|string|max:100',
+        'ship_country'  => 'required_if:ship_different,1|string|max:100',
+        'ship_zip'      => 'required_if:ship_different,1|string|max:20',
+        'ship_phone'    => 'required_if:ship_different,1|string|max:20',
     ]);
+
+    }
 
     $products = $request->products;
 
     if (!$products || count($products) == 0) {
         return back()->with('error', 'No products selected.');
     }
+
+
+     session([
+        'billing' => [
+            'first_name' => $request->first_name,
+            'last_name'  => $request->last_name,
+            'address1'   => $request->address1,
+            'address2'   => $request->address2,
+            'city'       => $request->city,
+            'country'    => $request->country,
+            'postcode'   => $request->postcode,
+            'phone'      => $request->phone,
+            'email'      => $request->email,
+        ],
+        'shipping' => $request->ship_different ? [
+            'ship_address1' => $request->ship_address1,
+            'ship_address2' => $request->ship_address2,
+            'ship_city'     => $request->ship_city,
+            'ship_country'  => $request->ship_country,
+            'ship_zip'      => $request->ship_zip,
+            'ship_phone'    => $request->ship_phone,
+        ] : null,
+        'ship_different' => $request->ship_different ?? 0,
+    ]);
 
     DB::beginTransaction();
 
@@ -512,6 +550,56 @@ public function orderStatus($order)
     }
 
     return view('Client.orderstatus', compact('order'));
+}
+
+
+public function saveBillingDetails(Request $request)
+{
+    // Validate inputs
+    $request->validate([
+        'first_name'    => 'required|string|max:50',
+        'last_name'     => 'required|string|max:50',
+        'address1'      => 'required|string|max:255',
+        'address2'      => 'nullable|string|max:255',
+        'city'          => 'required|string|max:100',
+        'country'       => 'required|string|max:100',
+        'postcode'      => 'required|string|max:20',
+        'phone'         => 'required|string|max:20',
+        'email'         => 'required|email|max:100',
+        'ship_different'=> 'nullable|boolean',
+        'ship_address1' => 'required_if:ship_different,1|string|max:255',
+        'ship_address2' => 'nullable|string|max:255',
+        'ship_city'     => 'required_if:ship_different,1|string|max:100',
+        'ship_country'  => 'required_if:ship_different,1|string|max:100',
+        'ship_zip'      => 'required_if:ship_different,1|string|max:20',
+        'ship_phone'    => 'required_if:ship_different,1|string|max:20',
+    ]);
+
+    // Save billing & shipping in session
+    session([
+        'billing' => [
+            'first_name' => $request->first_name,
+            'last_name'  => $request->last_name,
+            'address1'   => $request->address1,
+            'address2'   => $request->address2,
+            'city'       => $request->city,
+            'country'    => $request->country,
+            'postcode'   => $request->postcode,
+            'phone'      => $request->phone,
+            'email'      => $request->email,
+        ],
+        'shipping' => $request->ship_different ? [
+            'ship_address1' => $request->ship_address1,
+            'ship_address2' => $request->ship_address2,
+            'ship_city'     => $request->ship_city,
+            'ship_country'  => $request->ship_country,
+            'ship_zip'      => $request->ship_zip,
+            'ship_phone'    => $request->ship_phone,
+        ] : null,
+        'ship_different' => $request->ship_different ?? 0,
+    ]);
+
+    return redirect()->back()->with('success', 'Billing & Shipping details saved.');
 }
 
 }
