@@ -280,7 +280,17 @@ if ($productId) {
     }
     }
 
-    return view('client.DeliveryInfo', compact('products'));
+      $billing = session('billing');
+
+    if ($billing == null) {
+        // Billing session இல்லை → First time page
+        return view('client.DeliveryInfo', compact('products'));
+    } else {
+        // Billing session உள்ளது → Summary page
+        return view('client.DeliveryInfo2', compact('products'));
+    }
+
+    //return view('client.DeliveryInfo', compact('products'));
 
 
 
@@ -555,6 +565,8 @@ public function orderStatus($order)
 
 public function saveBillingDetails(Request $request)
 {
+    Log::info('Store Payment Data: ' . json_encode($request->all()));
+
     // Validate inputs
     $request->validate([
         'first_name'    => 'required|string|max:50',
@@ -576,28 +588,35 @@ public function saveBillingDetails(Request $request)
     ]);
 
     // Save billing & shipping in session
-    session([
-        'billing' => [
-            'first_name' => $request->first_name,
-            'last_name'  => $request->last_name,
-            'address1'   => $request->address1,
-            'address2'   => $request->address2,
-            'city'       => $request->city,
-            'country'    => $request->country,
-            'postcode'   => $request->postcode,
-            'phone'      => $request->phone,
-            'email'      => $request->email,
-        ],
-        'shipping' => $request->ship_different ? [
-            'ship_address1' => $request->ship_address1,
-            'ship_address2' => $request->ship_address2,
-            'ship_city'     => $request->ship_city,
-            'ship_country'  => $request->ship_country,
-            'ship_zip'      => $request->ship_zip,
-            'ship_phone'    => $request->ship_phone,
-        ] : null,
-        'ship_different' => $request->ship_different ?? 0,
-    ]);
+    // Prepare billing data
+$billingData = [
+    'first_name' => $request->first_name,
+    'last_name'  => $request->last_name,
+    'address1'   => $request->address1,
+    'address2'   => $request->address2,
+    'city'       => $request->city,
+    'country'    => $request->country,
+    'postcode'   => $request->postcode,
+    'phone'      => $request->phone,
+    'email'      => $request->email,
+];
+
+// Prepare shipping data (only if ship_different is checked)
+$shippingData = $request->ship_different ? [
+    'ship_address1' => $request->ship_address1,
+    'ship_address2' => $request->ship_address2,
+    'ship_city'     => $request->ship_city,
+    'ship_country'  => $request->ship_country,
+    'ship_zip'      => $request->ship_zip,
+    'ship_phone'    => $request->ship_phone,
+] : null;
+
+// Save both to session
+session([
+    'billing'        => $billingData,
+    'shipping'       => $shippingData,
+    'ship_different' => $request->ship_different ?? 0,
+]);
 
     return redirect()->back()->with('success', 'Billing & Shipping details saved.');
 }

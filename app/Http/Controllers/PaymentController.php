@@ -15,91 +15,143 @@ use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
 
+// Step 1: Store checkout data in session and create Stripe session
+public function createCheckoutSession(Request $request)
+{
+    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+    // Get billing & shipping from session
+    $billing  = session('billing');
+    $shipping = session('shipping');
+    $products = session('products') ?? $request->products;
+
+    if (!$billing || !$products) {
+        return redirect()->back()->with('error','Billing or products missing.');
+    }
+
+     session([
+        'products' => $products,
+        'billing'  => $billing,
+        'shipping' => $shipping,
+       'ship_different' => session('ship_different') ?? 0,
+        
+    ]);
+
+    // session([
+    //     'checkout_products' => $products,
+    //     'checkout_billing'  => $billing,
+    //     'checkout_shipping' => $shipping,
+    //     'checkout_ship_different' => session('ship_different') ?? 0,
+    // ]);
+
+    $lineItems = [];
+    foreach ($products as $data) {
+        $product = ProductModel::findOrFail($data['id']);
+        $lineItems[] = [
+            'price_data' => [
+                'currency' => 'lkr',
+                'product_data' => ['name' => $product->name],
+                'unit_amount' => (int) round(($product['discountedPrice'] ?? $product->price) * 100),
+            ],
+            'quantity' => $data['quantity'],
+        ];
+    }
+
+    try {
+        $session = StripeSession::create([
+            'payment_method_types' => ['card'],
+            'line_items' => $lineItems,
+            'mode' => 'payment',
+            'success_url' => route('payment.success'),
+            'cancel_url'  => route('payment.cancel'),
+        ]);
+        return redirect($session->url);
+    } catch (\Exception $e) {
+        return back()->with('error', 'Stripe Error: ' . $e->getMessage());
+    }
+}
+// Step 2: Payment success → retrieve data from session
+public function paymentSuccess(Request $request)
+{
+    try {
+        // $products = session('checkout_products');
+        // $billing  = session('checkout_billing');
+        // $shipping = session('checkout_shipping');
+        $shipDifferent = session('ship_different') ?? 0;
+
+        $billing  = session('billing');
+        $shipping = session('shipping');
+        $products = session('products') ?? $request->products;
+
+        if(!$products || !$billing) {
+                        Log::info("Order data missing.");
+
+            return redirect()->route('home')->with('error','Order data missing.');
+        }
+
+        $fakeRequest = new Request(array_merge([
+            'products' => $products,
+            'first_name'=> $billing['first_name'],
+            'last_name' => $billing['last_name'],
+            'email'     => $billing['email'],
+            'phone'     => $billing['phone'],
+            'address1'  => $billing['address1'],
+            'city'      => $billing['city'],
+            'country'   => $billing['country'],
+            'postcode'  => $billing['postcode'],
+            'ship_different' => $shipDifferent,
+        ], $shipping ?? []));
+
+        Log::info("Store Payment start: ", $fakeRequest->all()); // ✅ check data here
+
+        $order = $this->storeOrder($fakeRequest, 'card');
+
+        // Clear session
+        session()->forget(['checkout_products','checkout_billing','checkout_shipping','checkout_ship_different']);
+
+        return redirect()->route('order.status',['order'=>$order->id])
+            ->with('success','Order placed successfully (Card Payment)');
+
+    } catch (\Exception $e) {
+        Log::error("Stripe Order store failed: ".$e->getMessage());
+        return redirect()->route('home')->with('error','Payment verification failed.');
+    }
+}
+
 // public function createCheckoutSession(Request $request)
 //     {
 //         Stripe::setApiKey(env('STRIPE_SECRET'));
 
 //         try {
-//             // Calculate total from products
-//             $total = 0;
+//             // Stripe requires line_items
 //             $lineItems = [];
-
-//             foreach ($request->products as $product) {
-//                 $price    = (float) $product['price'];
-//                 $quantity = (int)   $product['quantity'];
-//                 $total   += $price * $quantity;
-
+//             foreach ($request->products as $data) {
+//                 $product = ProductModel::findOrFail($data['id']);
 //                 $lineItems[] = [
 //                     'price_data' => [
-//                         'currency'     => 'usd',
-//                         'product_data' => [
-//                             'name' => $product['name'],
-//                         ],
-//                         // USD needs cents (× 100)
-//                         'unit_amount'  => (int) round($price * 100),
+//                         'currency' => 'lkr',
+//                         'product_data' => ['name' => $product->name],
+//                         'unit_amount' => (int) round($product->price * 100),
 //                     ],
-//                     'quantity' => $quantity,
+//                     'quantity' => $data['quantity'],
 //                 ];
 //             }
 
-//             Log::info("Checkout Session Total: $" . ($total));
-
-//             // ✅ Create Stripe Checkout Session
+//             // Create Stripe Checkout Session
 //             $session = StripeSession::create([
 //                 'payment_method_types' => ['card'],
-//                 'line_items'           => $lineItems,
-//                 'mode'                 => 'payment',
-//                 // After payment success → come back to our site
-//                 'success_url'          => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}',
-//                 // If user cancels → come back to checkout
-//                 'cancel_url'           => route('payment.cancel'),
+//                 'line_items' => $lineItems,
+//                 'mode' => 'payment',
+//                 'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}&products=' . urlencode(json_encode($request->products)) . '&first_name=' . $request->first_name . '&last_name=' . $request->last_name . '&email=' . $request->email . '&phone=' . $request->phone . '&address1=' . $request->address1 . '&city=' . $request->city . '&country=' . $request->country . '&postcode=' . $request->postcode,
+//                 'cancel_url'  => route('payment.cancel'),
 //             ]);
 
-//             Log::info("Stripe Session Created: " . $session->id);
-
-//             // ✅ Redirect user to Stripe's hosted card page
 //             return redirect($session->url);
 
 //         } catch (\Exception $e) {
-//             Log::error("Stripe Session Error: " . $e->getMessage());
-//             return back()->with('error', 'Payment error: ' . $e->getMessage());
+//             return back()->with('error', 'Stripe Error: ' . $e->getMessage());
 //         }
 //     }
-
-public function createCheckoutSession(Request $request)
-    {
-        Stripe::setApiKey(env('STRIPE_SECRET'));
-
-        try {
-            // Stripe requires line_items
-            $lineItems = [];
-            foreach ($request->products as $data) {
-                $product = ProductModel::findOrFail($data['id']);
-                $lineItems[] = [
-                    'price_data' => [
-                        'currency' => 'lkr',
-                        'product_data' => ['name' => $product->name],
-                        'unit_amount' => (int) round($product->price * 100),
-                    ],
-                    'quantity' => $data['quantity'],
-                ];
-            }
-
-            // Create Stripe Checkout Session
-            $session = StripeSession::create([
-                'payment_method_types' => ['card'],
-                'line_items' => $lineItems,
-                'mode' => 'payment',
-                'success_url' => route('payment.success') . '?session_id={CHECKOUT_SESSION_ID}&products=' . urlencode(json_encode($request->products)) . '&first_name=' . $request->first_name . '&last_name=' . $request->last_name . '&email=' . $request->email . '&phone=' . $request->phone . '&address1=' . $request->address1 . '&city=' . $request->city . '&country=' . $request->country . '&postcode=' . $request->postcode,
-                'cancel_url'  => route('payment.cancel'),
-            ]);
-
-            return redirect($session->url);
-
-        } catch (\Exception $e) {
-            return back()->with('error', 'Stripe Error: ' . $e->getMessage());
-        }
-    }
 
 
    public function createPaymentIntent(Request $request)
@@ -144,78 +196,103 @@ public function createCheckoutSession(Request $request)
     // =========================================================
     // ✅ Payment Success Page
     // =========================================================
-    public function paymentSuccess(Request $request)
-    {
-         Stripe::setApiKey(env('STRIPE_SECRET'));
 
-        try {
-            $session = StripeSession::retrieve($request->session_id);
+// public function paymentSuccess(Request $request)
+// {
+// Log::info("Store Payment start: " . json_encode($request->all()));
+//     Stripe::setApiKey(env('STRIPE_SECRET'));
+//     try {
+//         $sessionId = $request->session_id;
+//         $session = StripeSession::retrieve($sessionId);
 
-            if ($session->payment_status != 'paid') {
-                return redirect()->route('home')->with('error', 'Payment not completed.');
-            }
+//         if($session->payment_status !== 'paid')
+//             return redirect()->route('home')->with('error','Payment not completed.');
 
-            // ✅ Only now store order
-            $products = json_decode($request->products, true);
+//         $products = session('checkout_products');
+//         $billing  = session('checkout_billing');
+//         $shipping = session('checkout_shipping');
+//         $shipDifferent = session('checkout_ship_different');
 
-            $fakeRequest = new \Illuminate\Http\Request();
-            $fakeRequest->replace(array_merge($request->all(), ['products' => $products]));
+//         if(!$products || !$billing)
+//             return redirect()->route('home')->with('error','Order data missing.');
 
-            $order = $this->storeOrder($fakeRequest, 'card');
+//         $fakeRequest = new Request(array_merge([
+//             'products' => $products,
+//             'first_name'=> $billing['first_name'],
+//             'last_name' => $billing['last_name'],
+//             'email'     => $billing['email'],
+//             'phone'     => $billing['phone'],
+//             'address1'  => $billing['address1'],
+//             'city'      => $billing['city'],
+//             'country'   => $billing['country'],
+//             'postcode'  => $billing['postcode'],
+//             'ship_different' => $shipDifferent,
+//         ], $shipping ?? []));
 
-            return redirect()->route('order.status', ['order' => $order->id])
-                ->with('success', 'Order placed successfully (Card Payment)');
+//         $order = $this->storeOrder($fakeRequest, 'card');
 
-        } catch (\Exception $e) {
-            return redirect()->route('home')->with('error', 'Payment verification failed.');
-        }
+//         session()->forget(['checkout_products','checkout_billing','checkout_shipping','checkout_ship_different']);
 
+//         return redirect()->route('order.status',['order'=>$order->id])
+//             ->with('success','Order placed successfully (Card Payment)');
 
-
-
-
-
-
+//     } catch (\Exception $e) {
+//         return redirect()->route('home')->with('error','Payment verification failed: '.$e->getMessage());
+//     }
+// }
 
 
 
+    // public function paymentSuccess(Request $request)
+    // {
+    //      Stripe::setApiKey(env('STRIPE_SECRET'));
 
+    //     try {
+    //         $session = StripeSession::retrieve($request->session_id);
 
+    //         if ($session->payment_status != 'paid') {
+    //             return redirect()->route('home')->with('error', 'Payment not completed.');
+    //         }
 
+    //         // ✅ Only now store order
+    //         $products = json_decode($request->products, true);
 
+    //         $fakeRequest = new \Illuminate\Http\Request();
+    //         $fakeRequest->replace(array_merge($request->all(), ['products' => $products]));
 
-        // Stripe::setApiKey(env('STRIPE_SECRET'));
+    //         $order = $this->storeOrder($fakeRequest, 'card');
 
-        // try {
-        //     $session = StripeSession::retrieve($request->session_id);
+    //         return redirect()->route('order.status', ['order' => $order->id])
+    //             ->with('success', 'Order placed successfully (Card Payment)');
 
-        //     // ✅ Save order to DB here:
-        //     // Order::create([
-        //     //     'user_id'           => auth()->id(),
-        //     //     'total'             => $session->amount_total / 100,
-        //     //     'payment_intent_id' => $session->payment_intent,
-        //     //     'status'            => 'paid',
-        //     // ]);
+    //     } catch (\Exception $e) {
+    //         return redirect()->route('home')->with('error', 'Payment verification failed.');
+    //     }
 
-        //     return view('payment.success', ['session' => $session]);
-
-        // } catch (\Exception $e) {
-        //     return redirect('/')->with('error', 'Could not verify payment.');
-        // }
-    }
+    // }
 
      
     // =========================================================
     // ✅ Cash on Delivery
     // =========================================================
-    public function handleCOD(Request $request)
-    {
-        return redirect()->route('order.status')
-            ->with('success', 'Order Placed Successfully (Cash On Delivery)');
-    }
 
-     private function storeOrder(Request $request, $paymentType = 'cash')
+    // Cash on Delivery
+public function handleCOD(Request $request)
+{
+    $order = $this->storeOrder($request,'cash');
+    return redirect()->route('order.status',['order'=>$order->id])
+        ->with('success','Order placed successfully (Cash On Delivery)');
+}
+    // public function handleCOD(Request $request)
+    // {
+    //     return redirect()->route('order.status')
+    //         ->with('success', 'Order Placed Successfully (Cash On Delivery)');
+    // }
+
+    private function storeOrder(Request $request, $paymentType = 'cash')
     {
+        Log::info("Store Payment start");
+
         DB::beginTransaction();
         try {
             $totalPrice = 0;
