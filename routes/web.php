@@ -161,6 +161,9 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
      Route::post('/single-order', [ClientController::class, 'storeSingle'])
     ->name('order.single');
 
+   Route::post('/single-order-old', [ClientController::class, 'storeOld'])  // ✅ URL மாற்றுங்கள்
+    ->name('order.singleOld');
+    
 Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
     ->name('delivery.info.cart');
 
@@ -170,6 +173,7 @@ Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
 Route::post('/payment/checkout-session', [PaymentController::class, 'createCheckoutSession'])->name('payment.checkout.session');
 Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');
 Route::get('/payment/cancel',  [PaymentController::class, 'paymentCancel'])->name('payment.cancel');
+Route::post('/payment/checkout-session1', [PaymentController::class, 'createCheckoutSession1'])->name('payment.checkout.session1');
 
 Route::get('/client/orderstatus/{order}', [ClientController::class, 'orderStatus'])
     ->name('order.status');

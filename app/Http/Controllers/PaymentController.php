@@ -15,11 +15,86 @@ use Illuminate\Support\Facades\DB;
 class PaymentController extends Controller
 {
 
+public function createCheckoutSession1(Request $request)
+{
+    Stripe::setApiKey(env('STRIPE_SECRET'));
+
+    // ✅ Request-லிருந்து நேரடியாக எடுங்கள் — session தேவையில்லை
+    $products = $request->products;
+    $billing  = [
+        'first_name' => $request->first_name,
+        'last_name'  => $request->last_name,
+        'email'      => $request->email,
+        'phone'      => $request->phone,
+        'address1'   => $request->address1,
+        'city'       => $request->city,
+        'country'    => $request->country,
+        'postcode'   => $request->postcode,
+    ];
+
+    if (!$products || count($products) == 0) {
+        return redirect()->back()->with('error', 'No products selected.');
+    }
+
+    // ✅ Session-ல் save பண்ணுங்கள் — success page-ல் use ஆகும்
+    session([
+        'billing'        => $billing,
+        'shipping'       => $request->ship_different ? [
+            'ship_address1' => $request->ship_address1,
+            'ship_address2' => $request->ship_address2,
+            'ship_city'     => $request->ship_city,
+            'ship_country'  => $request->ship_country,
+            'ship_zip'      => $request->ship_zip,
+            'ship_phone'    => $request->ship_phone,
+        ] : null,
+        'ship_different' => $request->ship_different ?? 0,
+        'products'       => $products,
+    ]);
+
+    $lineItems = [];
+    foreach ($products as $data) {
+        $product = ProductModel::findOrFail($data['id']);
+
+        $originalPrice = $product->price;
+        $discount = 0;
+        if ($product->discount_type === 'rate') {
+            $discount = ($originalPrice * $product->discount_rate) / 100;
+        } elseif ($product->discount_type === 'amount') {
+            $discount = $product->discount_amount;
+        }
+        $discount        = min($discount, $originalPrice);
+        $discountedPrice = $originalPrice - $discount;
+
+        $lineItems[] = [
+            'price_data' => [
+                'currency'     => 'lkr',
+                'product_data' => ['name' => $product->name],
+                'unit_amount'  => (int) round($discountedPrice * 100),
+            ],
+            'quantity' => $data['quantity'],
+        ];
+    }
+
+    try {
+        $session = StripeSession::create([
+            'payment_method_types' => ['card'],
+            'line_items'           => $lineItems,
+            'mode'                 => 'payment',
+            'success_url'          => route('payment.success'),
+            'cancel_url'           => route('payment.cancel'),
+        ]);
+
+        return redirect($session->url);
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Stripe Error: ' . $e->getMessage());
+    }
+}
+
 // Step 1: Store checkout data in session and create Stripe session
 public function createCheckoutSession(Request $request)
 {
     Stripe::setApiKey(env('STRIPE_SECRET'));
-
     // Get billing & shipping from session
     $billing  = session('billing');
     $shipping = session('shipping');
@@ -46,16 +121,30 @@ public function createCheckoutSession(Request $request)
 
     $lineItems = [];
     foreach ($products as $data) {
-        $product = ProductModel::findOrFail($data['id']);
-        $lineItems[] = [
-            'price_data' => [
-                'currency' => 'lkr',
-                'product_data' => ['name' => $product->name],
-                'unit_amount' => (int) round(($product['discountedPrice'] ?? $product->price) * 100),
-            ],
-            'quantity' => $data['quantity'],
-        ];
+    $product = ProductModel::findOrFail($data['id']);
+
+    // ✅ Blade-ல் போல் discount calculate பண்ணுங்கள்
+    $originalPrice = $product->price;
+    $discount = 0;
+
+    if ($product->discount_type === 'rate') {
+        $discount = ($originalPrice * $product->discount_rate) / 100;
+    } elseif ($product->discount_type === 'amount') {
+        $discount = $product->discount_amount;
     }
+
+    $discount        = min($discount, $originalPrice);
+    $discountedPrice = $originalPrice - $discount; // ✅ சரியான final price
+
+    $lineItems[] = [
+        'price_data' => [
+            'currency'     => 'lkr',
+            'product_data' => ['name' => $product->name],
+            'unit_amount'  => (int) round($discountedPrice * 100), // ✅ discounted price
+        ],
+        'quantity' => $data['quantity'],
+    ];
+}
 
     try {
         $session = StripeSession::create([
@@ -107,6 +196,7 @@ public function paymentSuccess(Request $request)
         $order = $this->storeOrder($fakeRequest, 'card');
 
         // Clear session
+        session()->forget('products');
         session()->forget(['checkout_products','checkout_billing','checkout_shipping','checkout_ship_different']);
 
         return redirect()->route('order.status',['order'=>$order->id])

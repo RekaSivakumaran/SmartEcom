@@ -126,10 +126,10 @@ input {
 
         {{-- 
             IMPORTANT: form action changes based on payment method.
-            COD  → route('order.single')              (normal POST)
+            COD  → route('order.singleOld')              (normal POST)
             Card → route('payment.checkout.session')  (Stripe redirect)
         --}}
-        <form method="POST" id="checkout-form" action="{{ route('order.single') }}">
+        <form method="POST" id="checkout-form" action="{{ route('order.singleOld') }}">
             @csrf
 
             @foreach($products as $product)
@@ -358,12 +358,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (paymentMethod === "cash") {
             // Normal COD submit
-            form.action = "{{ route('order.single') }}";
+            form.action = "{{ route('order.singleOld') }}";
             form.submit();
 
         } else if (paymentMethod === "card") {
             // ✅ Change form action to Stripe checkout session route
-            form.action = "{{ route('payment.checkout.session') }}";
+            form.action = "{{ route('payment.checkout.session1') }}";
             submitBtn.disabled    = true;
             submitBtn.textContent = "Redirecting to Stripe...";
             form.submit(); // POST to backend → backend redirects to Stripe page

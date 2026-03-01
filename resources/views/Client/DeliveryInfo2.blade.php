@@ -211,26 +211,27 @@ input {
     @endforeach
 
     {{-- Billing summary view --}}
-    <div class="billing-summary" id="billingDetails" style="{{ session('billing') ? '' : 'display:none;' }}">
-        <h3>Billing</h3>
+{{-- புதியது ✅ --}}
+<div class="billing-summary" id="billingDetails" style="{{ (session('billing') && !$errors->any()) ? '' : 'display:none;' }}">        <h3>Billing</h3>
 
-<p><strong>Name:</strong> {{ old('first_name', session('billing.first_name')) }} {{ old('last_name', session('billing.last_name')) }}</p>
-
+<p><strong>Name:</strong> 
+    {{ session('billing.first_name') }} 
+    {{ session('billing.last_name') }}
+</p>
 <p><strong>Address:</strong>
-    {{ old('address1', session('billing.address1')) }},
-    {{ old('city', session('billing.city')) }},
-    {{ old('postcode', session('billing.postcode')) }},
-    {{ old('country', session('billing.country')) }}
+    {{ session('billing.address1') }},
+    {{ session('billing.city') }},
+    {{ session('billing.postcode') }},
+    {{ session('billing.country') }}
 </p>
 
 <p><strong>Email:</strong>
-    <a href="mailto:{{ old('email', session('billing.email')) }}">
-        {{ old('email', session('billing.email')) }}
+    <a href="mailto:{{ session('billing.email') }}">
+        {{ session('billing.email') }}
     </a>
 </p>
 
-<p><strong>Phone:</strong> {{ old('phone', session('billing.phone')) }}</p>
-
+<p><strong>Phone:</strong> {{ session('billing.phone') }}</p>
         <button type="button" class="edit-btn" onclick="editBilling()">Edit</button>
 
         <button type="submit" class="place-order" id="submit-btn">
@@ -258,8 +259,8 @@ input {
 
 
     {{-- ───── Billing Details ───── --}}
-    <div class="billing" id="editDetails" style="{{ session('billing') ? 'display:none;' : 'display:block;' }}">
-    <form method="POST" id="billing-form" action="{{ route('billing.save') }}">
+{{-- புதியது ✅ --}}
+<div class="billing" id="editDetails" style="{{ (session('billing') && !$errors->any()) ? 'display:none;' : 'display:block;' }}">    <form method="POST" id="billing-form" action="{{ route('billing.save') }}">
         @csrf
 
         @foreach($products as $product)
@@ -271,94 +272,108 @@ input {
 
         <div>
             <label>First Name *</label>
-            <input type="text" name="first_name" value="{{ old('first_name', session('billing.first_name')) }}">
+            <input type="text" name="first_name" 
+                value="{{ $errors->any() ? old('first_name') : session('billing.first_name') }}">
             @error('first_name')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         <div>
             <label>Last Name *</label>
-            <input type="text" name="last_name" value="{{ old('last_name', session('billing.last_name')) }}">
+            <input type="text" name="last_name" 
+                value="{{ $errors->any() ? old('last_name') : session('billing.last_name') }}">
             @error('last_name')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         <div class="full-width">
             <label>Street Address 1 *</label>
-            <input type="text" name="address1" value="{{ old('address1', session('billing.address1')) }}">
+            <input type="text" name="address1" 
+                value="{{ $errors->any() ? old('address1') : session('billing.address1') }}">
             @error('address1')<small style="color:red">{{ $message }}</small>@enderror
-
         </div>
 
         <div class="full-width">
             <label>Street Address 2</label>
-            <input type="text" name="address2" value="{{ old('address2', session('billing.address2')) }}">
+            <input type="text" name="address2" 
+                value="{{ $errors->any() ? old('address2') : session('billing.address2') }}">
         </div>
 
         <div>
             <label>City *</label>
-            <input type="text" name="city" value="{{ old('city', session('billing.city')) }}">
+            <input type="text" name="city" 
+                value="{{ $errors->any() ? old('city') : session('billing.city') }}">
             @error('city')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         <div>
             <label>Country *</label>
-            <input type="text" name="country" value="{{ old('country', session('billing.country')) }}">
+            <input type="text" name="country" 
+                value="{{ $errors->any() ? old('country') : session('billing.country') }}">
             @error('country')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         <div>
             <label>Postcode / ZIP *</label>
-            <input type="text" name="postcode" value="{{ old('postcode', session('billing.postcode')) }}">
+            <input type="text" name="postcode" 
+                value="{{ $errors->any() ? old('postcode') : session('billing.postcode') }}">
             @error('postcode')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         <div>
             <label>Phone *</label>
-            <input type="text" name="phone" value="{{ old('phone', session('billing.phone')) }}">
+            <input type="text" name="phone" 
+                value="{{ $errors->any() ? old('phone') : session('billing.phone') }}">
             @error('phone')<small style="color:red">{{ $message }}</small>@enderror
-
         </div>
 
         <div class="full-width">
             <label>Email *</label>
-            <input type="email" name="email" value="{{ old('email', session('billing.email')) }}">
+            <input type="email" name="email" 
+                value="{{ $errors->any() ? old('email') : session('billing.email') }}">
             @error('email')<small style="color:red">{{ $message }}</small>@enderror
         </div>
 
         {{-- Checkbox: Ship Different --}}
         <div class="Checkfull-width">
-            <input type="checkbox" name="ship_different" value="1" id="different-address" {{ session('shipping') ? 'checked' : '' }}>
+            <input type="checkbox" name="ship_different" value="1" id="different-address" 
+                {{ ($errors->any() ? old('ship_different') : session('ship_different')) ? 'checked' : '' }}>
             <span>Ship to a different address?</span>
         </div>
 
         {{-- Shipping Section --}}
-        <div id="shippingDetails" style="{{ session('shipping') ? 'display:grid;' : 'display:none;' }}">
+        <div id="shippingDetails" style="{{ ($errors->any() ? old('ship_different') : session('shipping')) ? 'display:grid;' : 'display:none;' }}">
             <div class="full-width">
                 <label>Shipping Address 1 *</label>
-                <input type="text" name="ship_address1" value="{{ old('ship_address1', session('shipping.ship_address1')) }}">
+                <input type="text" name="ship_address1" 
+                    value="{{ $errors->any() ? old('ship_address1') : session('shipping.ship_address1') }}">
             </div>
             <div class="full-width">
                 <label>Shipping Address 2</label>
-                <input type="text" name="ship_address2" value="{{ old('ship_address2', session('shipping.ship_address2')) }}">
+                <input type="text" name="ship_address2" 
+                    value="{{ $errors->any() ? old('ship_address2') : session('shipping.ship_address2') }}">
             </div>
             <div>
                 <label>Shipping City *</label>
-                <input type="text" name="ship_city" value="{{ old('ship_city', session('shipping.ship_city')) }}">
+                <input type="text" name="ship_city" 
+                    value="{{ $errors->any() ? old('ship_city') : session('shipping.ship_city') }}">
             </div>
             <div>
                 <label>Shipping Country *</label>
-                <input type="text" name="ship_country" value="{{ old('ship_country', session('shipping.ship_country')) }}">
+                <input type="text" name="ship_country" 
+                    value="{{ $errors->any() ? old('ship_country') : session('shipping.ship_country') }}">
             </div>
             <div>
                 <label>Shipping ZIP *</label>
-                <input type="text" name="ship_zip" value="{{ old('ship_zip', session('shipping.ship_zip')) }}">
+                <input type="text" name="ship_zip" 
+                    value="{{ $errors->any() ? old('ship_zip') : session('shipping.ship_zip') }}">
             </div>
             <div>
                 <label>Shipping Phone *</label>
-                <input type="text" name="ship_phone" value="{{ old('ship_phone', session('shipping.ship_phone')) }}">
+                <input type="text" name="ship_phone" 
+                    value="{{ $errors->any() ? old('ship_phone') : session('shipping.ship_phone') }}">
             </div>
         </div>
 
-        <button type="submit" class="place-order" id="submit-btn">Save Billing</button>
+        <button type="submit" class="place-order" id="billing-submit-btn">Save Billing</button>
     </form>
 </div>
 
@@ -528,8 +543,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const paymentRadios  = document.querySelectorAll('input[name="payment"]');
     const stripeInfo     = document.getElementById("stripe-info");
     const orderSubmitBtn = document.getElementById("submit-btn"); // Place Order button for order-form
-    const billingSubmitBtn = document.querySelector('#billing-form button[type="submit"]'); // Save Billing button
-
+    const billingSubmitBtn = document.getElementById("billing-submit-btn");
     const billingDisplay = document.getElementById("billingDetails");
     const billingEdit    = document.getElementById("editDetails");
 

@@ -414,7 +414,7 @@ if ($productId) {
 // }
 
 
-public function storeSingle(Request $request)
+public function storeOld(Request $request)
 {
     $validated = $request->validate([
         'first_name' => 'required|string|max:100',
@@ -551,6 +551,105 @@ public function storeSingle(Request $request)
     }
 }
 
+public function storeSingle(Request $request)
+{
+    $billing = session('billing');
+
+    if (!$billing) {
+        return back()->with('error', 'Please fill in your billing details first.');
+    }
+
+    $request->validate([
+        'products'             => 'required|array|min:1',
+        'products.*.id'        => 'required|integer',
+        'products.*.quantity'  => 'required|integer|min:1',
+    ]);
+
+    $products = $request->products;
+
+    if (!$products || count($products) == 0) {
+        return back()->with('error', 'No products selected.');
+    }
+
+    $shipping = session('shipping');
+
+    DB::beginTransaction();
+
+    try {
+        $totalPrice = 0;
+        $orderItems = [];
+
+        foreach ($products as $data) {
+            $product  = ProductModel::lockForUpdate()->findOrFail($data['id']);
+            $quantity = $data['quantity'];
+
+            if ($product->quantity < $quantity) {
+                DB::rollBack();
+                return back()->with('error', "{$product->name} stock இல்லை.");
+            }
+
+            $originalPrice = $product->price;
+            $discount = 0;
+
+            if ($product->discount_type === 'rate') {
+                $discount = ($originalPrice * $product->discount_rate) / 100;
+            } elseif ($product->discount_type === 'amount') {
+                $discount = $product->discount_amount;
+            }
+
+            $discount   = min($discount, $originalPrice);
+            $finalPrice = ($originalPrice - $discount) * $quantity;
+            $totalPrice += $finalPrice;
+
+            $orderItems[] = [
+                'product_id' => $product->id,
+                'quantity'   => $quantity,
+                'price'      => $originalPrice,
+                'total'      => $finalPrice,
+                'image_path' => $product->image ?? null,
+            ];
+
+            $product->quantity -= $quantity;
+            $product->save();
+        }
+
+        $lastOrder  = OrderModel::orderBy('id', 'desc')->first();
+        $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
+        $billNo     = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        $order = OrderModel::create([
+            'bill_no'           => $billNo,
+            'name'              => $billing['first_name'] . ' ' . $billing['last_name'],
+            'email'             => $billing['email'],
+            'mobile_number'     => $billing['phone'],
+            'billing_address1'  => $billing['address1'],
+            'billing_city'      => $billing['city'],
+            'billing_country'   => $billing['country'],
+            'billing_postcode'  => $billing['postcode'],
+            'status'            => 'Pending',
+            'payment_status'    => 'Pending',
+            'total'             => $totalPrice,
+        ]);
+
+        foreach ($orderItems as $item) {
+            OrderItemModel::create(array_merge($item, [
+                'order_id' => $order->id
+            ]));
+        }
+
+        DB::commit();
+
+        session()->forget(['billing', 'shipping', 'ship_different']);
+
+        return redirect()->route('order.status', ['order' => $order->id])
+            ->with('success', 'Order placed successfully!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong: ' . $e->getMessage());
+    }
+}
+
 public function orderStatus($order)
 {
     $order = OrderModel::find($order);
@@ -567,8 +666,7 @@ public function saveBillingDetails(Request $request)
 {
     Log::info('Store Payment Data: ' . json_encode($request->all()));
 
-    // Validate inputs
-    $request->validate([
+    $validated = $request->validate([
         'first_name'    => 'required|string|max:50',
         'last_name'     => 'required|string|max:50',
         'address1'      => 'required|string|max:255',
@@ -579,46 +677,40 @@ public function saveBillingDetails(Request $request)
         'phone'         => 'required|string|max:20',
         'email'         => 'required|email|max:100',
         'ship_different'=> 'nullable|boolean',
-        'ship_address1' => 'required_if:ship_different,1|string|max:255',
+        'ship_address1' => 'required_if:ship_different,1|nullable|string|max:255',
         'ship_address2' => 'nullable|string|max:255',
-        'ship_city'     => 'required_if:ship_different,1|string|max:100',
-        'ship_country'  => 'required_if:ship_different,1|string|max:100',
-        'ship_zip'      => 'required_if:ship_different,1|string|max:20',
-        'ship_phone'    => 'required_if:ship_different,1|string|max:20',
+        'ship_city'     => 'required_if:ship_different,1|nullable|string|max:100',
+        'ship_country'  => 'required_if:ship_different,1|nullable|string|max:100',
+        'ship_zip'      => 'required_if:ship_different,1|nullable|string|max:20',
+        'ship_phone'    => 'required_if:ship_different,1|nullable|string|max:20',
     ]);
 
-    // Save billing & shipping in session
-    // Prepare billing data
-$billingData = [
-    'first_name' => $request->first_name,
-    'last_name'  => $request->last_name,
-    'address1'   => $request->address1,
-    'address2'   => $request->address2,
-    'city'       => $request->city,
-    'country'    => $request->country,
-    'postcode'   => $request->postcode,
-    'phone'      => $request->phone,
-    'email'      => $request->email,
-];
+    session([
+        'billing' => [
+            'first_name' => $request->first_name,
+            'last_name'  => $request->last_name,
+            'address1'   => $request->address1,
+            'address2'   => $request->address2,
+            'city'       => $request->city,
+            'country'    => $request->country,
+            'postcode'   => $request->postcode,
+            'phone'      => $request->phone,
+            'email'      => $request->email,
+        ],
+        'shipping' => $request->ship_different ? [
+            'ship_address1' => $request->ship_address1,
+            'ship_address2' => $request->ship_address2,
+            'ship_city'     => $request->ship_city,
+            'ship_country'  => $request->ship_country,
+            'ship_zip'      => $request->ship_zip,
+            'ship_phone'    => $request->ship_phone,
+        ] : null,
+        'ship_different' => $request->ship_different ?? 0,
+    ]);
 
-// Prepare shipping data (only if ship_different is checked)
-$shippingData = $request->ship_different ? [
-    'ship_address1' => $request->ship_address1,
-    'ship_address2' => $request->ship_address2,
-    'ship_city'     => $request->ship_city,
-    'ship_country'  => $request->ship_country,
-    'ship_zip'      => $request->ship_zip,
-    'ship_phone'    => $request->ship_phone,
-] : null;
+    session()->save();
 
-// Save both to session
-session([
-    'billing'        => $billingData,
-    'shipping'       => $shippingData,
-    'ship_different' => $request->ship_different ?? 0,
-]);
-
-    return redirect()->back()->with('success', 'Billing & Shipping details saved.');
+    return redirect()->back()->with('success', 'Billing details saved successfully!');
 }
 
 }
