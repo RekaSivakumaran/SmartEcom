@@ -46,11 +46,18 @@
                 </div>
                 <div class="col-lg-8 col-sm-12">
                     <div class="contact-form-right">
+                        @if(session('success'))
+<div id="success-alert" class="alert alert-success alert-dismissible fade show">
+    {{ session('success')}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
                         <h2>GET IN TOUCH</h2>
     <p>
         SMartEcom is a smart e-commerce platform offering quality products, fast delivery, and secure payments for a seamless shopping experience.
     </p>
-                        <form id="contactForm">
+                        <form action="{{ route('contact.store') }}" method="POST">
+                            @csrf
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -60,19 +67,19 @@
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <input type="text" placeholder="Your Email" id="email" class="form-control" name="name" required data-error="Please enter your email">
+                                        <input type="text" placeholder="Your Email" id="email" class="form-control" name="email" required data-error="Please enter your email">
                                         <div class="help-block with-errors"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <input type="text" class="form-control" id="subject" name="name" placeholder="Subject" required data-error="Please enter your Subject">
+                                        <input type="text" class="form-control" id="subject" name="subject" placeholder="Subject" required data-error="Please enter your Subject">
                                         <div class="help-block with-errors"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <textarea class="form-control" id="message" placeholder="Your Message" rows="4" data-error="Write your message" required></textarea>
+                                        <textarea class="form-control" id="message" name="message" placeholder="Your Message" rows="4" data-error="Write your message" required></textarea>
                                         <div class="help-block with-errors"></div>
                                     </div>
                                     <div class="submit-button text-center">
@@ -89,5 +96,16 @@
         </div>
     </div>
     <!-- End Cart -->
+
+    <script>
+setTimeout(function() {
+    var alert = document.getElementById('success-alert');
+    if(alert){
+        alert.style.transition = "opacity 0.5s";
+        alert.style.opacity = "0";
+        setTimeout(() => alert.remove(), 500);
+    }
+}, 2000);
+</script>
 
 @endsection

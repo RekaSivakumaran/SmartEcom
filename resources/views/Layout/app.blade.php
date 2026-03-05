@@ -461,17 +461,17 @@
     <main class="content">
         <!-- Top bar -->
         <div class="topbar">
-            <div style="display: flex; align-items: center; gap: 20px;">
+            <!-- <div style="display: flex; align-items: center; gap: 20px;">
                 <span class="menu-toggle" onclick="toggleSidebar()">
                     <i class="fa-solid fa-bars"></i>
                 </span>
                 <input type="text" class="search" placeholder="Search here..." />
-            </div>
+            </div> -->
             <div class="user">
-                <span class="bell">
+                <!-- <span class="bell">
                     <i class="fa-solid fa-bell"></i>
                     <span class="count">0</span>
-                </span>
+                </span> -->
                 <img src="{{ asset('Image/userIMG.jpg') }}" class="avatar" alt="User Avatar">
                 <div class="info">
                     @php

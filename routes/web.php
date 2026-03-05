@@ -13,6 +13,8 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\ContactController;
+
 
 
 Route::get('/', function () {
@@ -186,3 +188,5 @@ Route::post('/save-billing', [ClientController::class, 'saveBillingDetails'])->n
 Route::get('/recommendations/{product_name}', [RecommendationController::class, 'showRecommendations'])->name('recommendations');
 Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])
     ->name('dashboard');
+Route::post('/client/contactus', [ContactController::class,'store'])->name('contact.store');
+ 
