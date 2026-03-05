@@ -11,6 +11,9 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\RecommendationController;
+use App\Http\Controllers\AdminDashboardController;
+
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
@@ -179,3 +182,7 @@ Route::get('/client/orderstatus/{order}', [ClientController::class, 'orderStatus
     ->name('order.status');
 
 Route::post('/save-billing', [ClientController::class, 'saveBillingDetails'])->name('billing.save');
+// Route::post('/recommend', [RecommendationController::class, 'getRecommendations']);
+Route::get('/recommendations/{product_name}', [RecommendationController::class, 'showRecommendations'])->name('recommendations');
+Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])
+    ->name('dashboard');

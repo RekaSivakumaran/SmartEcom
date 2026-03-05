@@ -4,6 +4,27 @@
 
 @section('content')
 
+<style>
+/* Button base style */
+.custom-cart-btn {
+    margin-top: 10px;
+     
+    padding: 6px 18px;
+    background: #d33b33;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Mouse hover effect */
+.custom-cart-btn:hover {
+    transform: scale(1.1);   /* slightly bigger */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+</style>
 
 <!-- Start Slider -->
     <div id="slides-shop" class="cover-slides">
@@ -35,7 +56,7 @@
                         <div class="col-md-12">
                             <h1 class="m-b-20"><strong>Welcome To <br> SMart Ecom</strong></h1>
                             <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
-                            <p><a class="btn hvr-hover" href="#">Shop New</a></p>
+                            <p><a class="btn hvr-hover" href="{{ route('products.all') }}">Shop</a></p>
                         </div>
                     </div>
                 </div>
@@ -47,7 +68,7 @@
                         <div class="col-md-12">
                             <h1 class="m-b-20"><strong>Welcome To <br> SMart Ecom</strong></h1>
                             <p class="m-b-40">See how your users experience your website in realtime or view <br> trends to see any changes in performance over time.</p>
-                            <p><a class="btn hvr-hover" href="#">Shop New</a></p>
+                            <p><a class="btn hvr-hover" href="{{ route('products.all') }}">Shop</a></p>
                         </div>
                     </div>
                 </div>
@@ -59,6 +80,95 @@
         </div>
     </div>
     <!-- End Slider -->
+
+
+
+    <!-- Start Recommendations  -->
+<div class="products-box">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="title-all text-center">
+                    <h1>Related Products</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row special-list">
+            @foreach($products as $product)
+
+                @php
+                    // Calculate final price
+                    if($product->discount_rate > 0) {
+                        $finalPrice = $product->price - ($product->price * $product->discount_rate / 100);
+                        $displayRate = $product->discount_rate;
+                    } elseif($product->discount_amount > 0) {
+                        $finalPrice = $product->price - $product->discount_amount;
+                        $displayRate = ($product->discount_amount / $product->price) * 100;
+                    } else {
+                        $finalPrice = $product->price;
+                        $displayRate = 0;
+                    }
+                @endphp
+
+                <div class="col-lg-3 col-md-6 special-grid">
+                    <div class="products-single fix">
+                        <div class="box-img-hover">
+                            <img src="{{ asset($product->image) }}" 
+                                 class="img-fluid" 
+                                 alt="{{ $product->name }}">
+
+                            <div class="mask-icon">
+                                <ul>
+                                    <li>
+                                        <a href="{{ route('Client.shopdetails', $product->id) }}" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                                @if(session()->has('client_id'))
+                                    <a class="add-cart cart" href="#"
+                                       data-id="{{ $product->id }}"
+                                       data-name="{{ $product->name }}"
+                                       data-price="{{ $finalPrice }}"
+                                       data-image="{{ asset($product->image) }}">
+                                       Add to Cart
+                                    </a>
+                                @else
+                                    <a href="{{ route('ClientLogin') }}"
+                                       class="cart">
+                                       Add to Cart
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="why-text">
+                            <h4>{{ $product->name }}</h4>
+
+                            <h5>
+                                Rs.{{ number_format($finalPrice, 2) }}
+
+                                @if($displayRate > 0)
+                                    <del style="color: gray; font-size: 0.7em;">
+                                        Rs.{{ number_format($product->price, 2) }}
+                                    </del>
+
+                                    <small style="color: gray; font-size: 0.7em;">
+                                        -{{ number_format($displayRate, 0) }}%
+                                    </small>
+                                @endif
+                            </h5>
+                        </div>
+
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</div>
+<!-- End Recommendations  -->
 
 
 
@@ -137,11 +247,23 @@
                             </li>
 
                             <!-- <li><a href="#" title="View"><i class="fas fa-eye"></i></a></li> -->
-                            <li><a href="#" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
-                            <li><a href="#" title="Add to Wishlist"><i class="far fa-heart"></i></a></li>
+                            <!-- <li><a href="#" title="Compare"><i class="fas fa-sync-alt"></i></a></li>
+                            <li><a href="#" title="Add to Wishlist"><i class="far fa-heart"></i></a></li> -->
                         </ul>
-                        <a class="cart" href="#">Add to Cart</a>
-                    </div>
+                                @if(session()->has('client_id'))
+                                    <a class="add-cart cart" href="#"
+                                       data-id="{{ $product->id }}"
+                                       data-name="{{ $product->name }}"
+                                       data-price="{{ $finalPrice }}"
+                                       data-image="{{ asset($product->image) }}">
+                                       Add to Cart
+                                    </a>
+                                @else
+                                    <a href="{{ route('ClientLogin') }}"
+                                       class="cart">
+                                       Add to Cart
+                                    </a>
+                                @endif                    </div>
                 </div>
                 <div class="why-text">
                     <h4>{{ $product->name }}</h4>

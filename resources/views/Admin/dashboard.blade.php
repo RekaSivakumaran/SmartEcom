@@ -318,140 +318,134 @@
 
 <!-- Dashboard Cards -->
 <section class="cards">
-    <!-- Sales Card -->
-    <div class="card">
-        <div class="card-header">
-            <h4>Total Sales</h4>
-            <div class="card-icon icon-blue">💰</div>
-        </div>
-        <div class="value">Rs. 983,410</div>
-        <p class="small green">+3.34% vs last week</p>
-    </div>
 
-    <!-- Orders Card -->
-    <div class="card">
-        <div class="card-header">
-            <h4>Total Orders</h4>
-            <div class="card-icon icon-green">📦</div>
-        </div>
-        <div class="value">58,375</div>
-        <p class="small red">-2.89% vs last week</p>
+   <div class="card">
+    <div class="card-header">
+        <h4>Total Sales</h4>
+        <div class="card-icon icon-blue">💰</div>
     </div>
+    <div class="value">Rs. {{ number_format($totalSales ?? 0, 2) }}</div>
+</div>
 
-    <!-- Visitors Card -->
-    <div class="card">
-        <div class="card-header">
-            <h4>Total Visitors</h4>
-            <div class="card-icon icon-orange">👥</div>
-        </div>
-        <div class="value">237,782</div>
-        <p class="small green">+8.02% vs last week</p>
+<!-- Orders Card -->
+<div class="card">
+    <div class="card-header">
+        <h4>Total Orders</h4>
+        <div class="card-icon icon-green">📦</div>
     </div>
+    <div class="value">{{ number_format($totalOrders ?? 0) }}</div>
+</div>
 
-    <!-- Revenue Card -->
-    <div class="card">
-        <div class="card-header">
-            <h4>Total Revenue</h4>
-            <div class="card-icon icon-red">💳</div>
-        </div>
-        <div class="value">Rs. 1.2M</div>
-        <p class="small green">+12.5% vs last month</p>
+<!-- Customers Card -->
+<div class="card">
+    <div class="card-header">
+        <h4>Total Customers</h4>
+        <div class="card-icon icon-orange">👥</div>
     </div>
+    <div class="value">{{ number_format($totalCustomers ?? 0) }}</div>
+</div>
 
-    <!-- Monthly Target Card -->
+<!-- Revenue Card -->
+<div class="card">
+    <div class="card-header">
+        <h4>Total Revenue</h4>
+        <div class="card-icon icon-red">💳</div>
+    </div>
+    <div class="value">Rs. {{ number_format($totalRevenue ?? 0, 2) }}</div>
+</div>
+
+
     <div class="large-card">
         <h4>Monthly Target Progress</h4>
+
         <div class="progress-container">
             <div class="progress-label">
                 <span>Sales Target</span>
-                <span>85% Complete</span>
+                <span>{{ number_format($salesProgress,0) }}% Complete</span>
             </div>
+
             <div class="progress-bar">
-                <div class="progress-fill" style="width: 85%;"></div>
-            </div>
-        </div>
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Order Target</span>
-                <span>72% Complete</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: 72%;"></div>
-            </div>
-        </div>
-        <div class="progress-container">
-            <div class="progress-label">
-                <span>Customer Target</span>
-                <span>93% Complete</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: 93%;"></div>
+                <div class="progress-fill"
+                     style="width: {{ $salesProgress }}%;">
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Top Categories Card -->
+
+
+    <!-- ================= TOP CATEGORIES ================= -->
     <div class="large-card">
         <h4>Top Performing Categories</h4>
+
         <ul class="list">
-            <li>
-                <span>📱 Electronics</span>
-                <span>Rs. 1,200,000</span>
-            </li>
-            <li>
-                <span>👔 Fashion</span>
-                <span>Rs. 950,000</span>
-            </li>
-            <li>
-                <span>🏠 Home & Kitchen</span>
-                <span>Rs. 750,000</span>
-            </li>
-            <li>
-                <span>📚 Books & Media</span>
-                <span>Rs. 580,000</span>
-            </li>
-            <li>
-                <span>⚽ Sports & Outdoors</span>
-                <span>Rs. 420,000</span>
-            </li>
+            @forelse($topCategories as $category)
+                <li>
+                    <span>{{ $category->Maincategoryname }}</span>
+                    <span>Rs. {{ number_format($category->total_sales,2) }}</span>
+                </li>
+            @empty
+                <li>No Data Available</li>
+            @endforelse
         </ul>
     </div>
 
-    <!-- Recent Activity Card -->
+
+
+    <!-- ================= RECENT ORDERS ================= -->
     <div class="large-card">
         <h4>Recent Orders Activity</h4>
+
         <ul class="list">
-            <li>
-                <span>🟢 New order from John Doe</span>
-                <span>2 mins ago</span>
-            </li>
-            <li>
-                <span>🟡 Order #12453 shipped</span>
-                <span>15 mins ago</span>
-            </li>
-            <li>
-                <span>🔵 Payment received - Order #12450</span>
-                <span>1 hour ago</span>
-            </li>
-            <li>
-                <span>🟢 New order from Sarah Smith</span>
-                <span>2 hours ago</span>
-            </li>
-            <li>
-                <span>🟣 Order #12448 completed</span>
-                <span>3 hours ago</span>
-            </li>
+            @forelse($recentOrders as $order)
+                <li>
+                    <span>Order #{{ $order->id }} - {{ $order->customer_name ?? '' }}</span>
+                    <span>{{ $order->created_at->diffForHumans() }}</span>
+                </li>
+            @empty
+                <li>No Recent Orders</li>
+            @endforelse
         </ul>
     </div>
 
-    <!-- Sales Chart Placeholder -->
-    <div class="large-card">
-        <h4>Sales Analytics</h4>
-        <div class="chart-placeholder">
-            📊 Chart integration ready (Use Chart.js or similar library)
-        </div>
-    </div>
 
+
+    <!-- ================= SALES CHART PLACEHOLDER ================= -->
+  <div class="large-card">
+    <h4>Sales Analytics</h4>
+    <canvas id="salesChart"></canvas>
+</div>
+
+
+   
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    const salesChart = new Chart(ctx, {
+        type: 'line', // or bar
+        data: {
+            labels: {!! json_encode($dates) !!}, // ["2026-03-01", "2026-03-02", ...]
+            datasets: [{
+                label: 'Total Sales (Rs.)',
+                data: {!! json_encode($totals) !!}, // [1200, 4500, ...]
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 @endsection
