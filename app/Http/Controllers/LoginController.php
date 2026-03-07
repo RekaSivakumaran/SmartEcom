@@ -93,7 +93,8 @@ class LoginController extends Controller
         $request->session()->put('role_name', $admin->role->name ?? 'Admin');
 
 
-        return redirect('/admin/dashboard');
+        //return redirect('/admin/dashboard');
+        return redirect()->route('dashboard');
     }
 
      public function dashboard(Request $request)
@@ -101,6 +102,7 @@ class LoginController extends Controller
 
         if (!$request->session()->has('admin_id')) {
             return redirect('/admin/login');
+            
         }
 
         // return view('Admin.dashboard', [
