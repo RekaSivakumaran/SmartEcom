@@ -154,7 +154,7 @@ p{
         <input type="email" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Password" required>
 
-        <a href="#" class="link">Forgot password?</a>
+        <!-- <a href="#" class="link">Forgot password?</a> -->
 
         <button type="submit" class="primary-btn">Login</button>
     </form>
