@@ -758,4 +758,23 @@ public function saveBillingDetails(Request $request)
     return redirect()->back()->with('success', 'Billing details saved successfully!');
 }
 
+
+public function account()
+{
+    if (!session()->has('client_id')) {
+        return redirect()->route('ClientLogin');
+    }
+
+    $clientId = session('client_id');
+
+    $customer = CustomerModel::findOrFail($clientId);
+
+    $orders = orderModel::where('customer_id', $clientId)
+        ->with('items.product')
+        ->latest()
+        ->get();
+
+    return view('Client.account', compact('customer', 'orders'));
+}
+
 }

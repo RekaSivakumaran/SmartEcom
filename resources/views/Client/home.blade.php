@@ -419,7 +419,7 @@ function renderProducts(products) {
 
     container.innerHTML = '';
 
-   container.innerHTML = '';  // முதலில் clear பண்ணு
+   container.innerHTML = '';  
 
 products.forEach(product => {
     const discountHtml = product.display_rate > 0

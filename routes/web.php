@@ -204,3 +204,5 @@ Route::get('/recommendations/health',
 Route::get('/recommendations/purchased',
     [RecommendationController::class, 'getPurchasedRecommendations']
 )->name('recommendations.purchased');
+Route::get('/account', [ClientController::class, 'account'])
+    ->name('client.account');

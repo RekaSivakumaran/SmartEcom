@@ -92,21 +92,27 @@
     @if(session()->has('client_id'))
     <!-- Logged in -->
     <li class="nav-item">
-        <a class="nav-link" href="#">Welcome, {{ session('client_name') }}</a>
+        <a class="nav-link" href="{{ route('client.account') }}">
+            Welcome, {{ session('client_name') }}
+        </a>
     </li>
     <li class="nav-item">
-        <form id="logout-form" method="POST" action="{{ route('client.logout') }}" style="display:inline;">
+        <form id="logout-form" method="POST" 
+              action="{{ route('client.logout') }}" style="display:inline;">
             @csrf
-            <button type="submit" class="nav-link" 
-        style="background:none; color:white; font-weight:bold; border:none; padding:0; cursor:pointer;"
-        onmouseover="this.style.color='red';" 
-        onmouseout="this.style.color='white';">
-    LOGOUT
+            <button type="submit" class="nav-link"
+                style="background:none; color:white; font-weight:bold; 
+                       border:none; padding:0; cursor:pointer;"
+                onmouseover="this.style.color='red';"
+                onmouseout="this.style.color='white';">
+                LOGOUT
             </button>
         </form>
     </li>
 @else
-    <li><a href="#">My Account</a></li>
+    <li class="nav-item">
+        <a class="nav-link" href="{{ route('ClientLogin') }}">My Account</a>
+    </li>
 @endif
 
 
