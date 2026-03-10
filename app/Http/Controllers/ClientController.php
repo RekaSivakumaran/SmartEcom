@@ -39,13 +39,56 @@ class ClientController extends Controller
         return view('Client.home', compact('departments', 'products'));
     }
 
-    public function show($id)
-    {
-        $product = ProductModel::findOrFail($id);
+    // public function show($id)
+    // {
+    //     $product = ProductModel::findOrFail($id);
 
-        return view('Client.shopdetails', compact('product'));
+    //     return view('Client.shopdetails', compact('product'));
+    // }
+
+    public function show($id)
+{
+    $product = ProductModel::findOrFail($id);
+
+    // எல்லா மற்ற products candidates
+    $allOtherProducts = ProductModel::where('id', '!=', $id)
+        ->where('status', 'Active')
+        ->get();
+
+    $featuredProducts = collect();
+
+    try {
+        $candidateNames = $allOtherProducts->pluck('name')->toArray();
+
+        $response = \Illuminate\Support\Facades\Http::timeout(10)
+            ->post('http://127.0.0.1:5000/recommend-from-db', [
+                'purchased'  => [$product->name],
+                'candidates' => $candidateNames,
+                'n'          => 4,
+            ]);
+
+        if ($response->successful()) {
+            $flaskResults = collect($response->json());
+
+            $featuredProducts = $flaskResults->map(function ($item) use ($allOtherProducts) {
+                return $allOtherProducts->firstWhere('name', $item['product']);
+            })->filter()->values();
+        }
+    } catch (\Exception $e) {
+        
     }
 
+   
+    if ($featuredProducts->isEmpty()) {
+        $featuredProducts = ProductModel::where('id', '!=', $id)
+            ->where('status', 'Active')
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+    }
+
+    return view('Client.shopdetails', compact('product', 'featuredProducts'));
+}
 
     public function showCategories(Request $request)
     { 
@@ -520,6 +563,7 @@ public function storeOld(Request $request)
         $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
         $order = OrderModel::create([
+            'customer_id'      => session('client_id'),
             'bill_no' => $billNo,
             'name' => $validated['first_name'].' '.$validated['last_name'],
             'email' => $validated['email'],
@@ -618,6 +662,7 @@ public function storeSingle(Request $request)
         $billNo     = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
         $order = OrderModel::create([
+            'customer_id'      => session('client_id'),
             'bill_no'           => $billNo,
             'name'              => $billing['first_name'] . ' ' . $billing['last_name'],
             'email'             => $billing['email'],

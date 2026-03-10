@@ -166,7 +166,7 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
      Route::post('/single-order', [ClientController::class, 'storeSingle'])
     ->name('order.single');
 
-   Route::post('/single-order-old', [ClientController::class, 'storeOld'])  // ✅ URL மாற்றுங்கள்
+   Route::post('/single-order-old', [ClientController::class, 'storeOld'])   
     ->name('order.singleOld');
     
 Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
@@ -185,8 +185,22 @@ Route::get('/client/orderstatus/{order}', [ClientController::class, 'orderStatus
 
 Route::post('/save-billing', [ClientController::class, 'saveBillingDetails'])->name('billing.save');
 // Route::post('/recommend', [RecommendationController::class, 'getRecommendations']);
-Route::get('/recommendations/{product_name}', [RecommendationController::class, 'showRecommendations'])->name('recommendations');
+// Route::get('/recommendations/{product_name}', [RecommendationController::class, 'showRecommendations'])->name('recommendations');
 Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])
     ->name('dashboard');
 Route::post('/client/contactus', [ContactController::class,'store'])->name('contact.store');
- 
+
+
+Route::post('/recommendations/ajax',
+    [RecommendationController::class, 'getRecommendationsJson']
+)->name('recommendations.ajax');
+
+// Health check — test if Flask is running
+// Visit: http://127.0.0.1:8000/recommendations/health
+Route::get('/recommendations/health',
+    [RecommendationController::class, 'healthCheck']
+)->name('recommendations.health');
+
+Route::get('/recommendations/purchased',
+    [RecommendationController::class, 'getPurchasedRecommendations']
+)->name('recommendations.purchased');

@@ -11,4 +11,9 @@ class CustomerModel extends Model
      protected $fillable = ['name', 'email', 'mobile', 'password', 'status'];
 
       public $timestamps = false;
+
+      public function orders()
+      {
+            return $this->hasMany(\App\Models\orderModel::class, 'customer_id');
+      }
 }

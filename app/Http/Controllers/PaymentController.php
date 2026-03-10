@@ -417,6 +417,7 @@ public function handleCOD(Request $request)
             $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
             $order = OrderModel::create([
+                'customer_id'      => session('client_id'),
                 'bill_no' => $billNo,
                 'name' => $request->first_name . ' ' . $request->last_name,
                 'email' => $request->email,
