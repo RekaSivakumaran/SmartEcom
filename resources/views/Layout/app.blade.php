@@ -450,6 +450,13 @@
             </li>
 
             <li>
+    <a href="{{ route('admin.reviews') }}"
+       class="{{ request()->routeIs('admin.reviews') ? 'active' : '' }}">
+        <i class="fa-solid fa-star icon"></i> Reviews
+    </a>
+</li>
+
+            <li>
                 <a href="/admin/logout">
                     <i class="fa-solid fa-arrow-right-from-bracket icon"></i> Log Out
                 </a>

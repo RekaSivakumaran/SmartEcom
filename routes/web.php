@@ -14,6 +14,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ReviewController;
 
 
 
@@ -206,3 +207,51 @@ Route::get('/recommendations/purchased',
 )->name('recommendations.purchased');
 Route::get('/account', [ClientController::class, 'account'])
     ->name('client.account');
+
+    Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
+
+// Admin — review management
+Route::get('/admin/reviews',                [ReviewController::class, 'adminIndex'])->name('admin.reviews');
+Route::post('/admin/reviews/{id}/approve',  [ReviewController::class, 'approve'])->name('admin.reviews.approve');
+Route::post('/admin/reviews/{id}/reject',   [ReviewController::class, 'reject'])->name('admin.reviews.reject');
+Route::delete('/admin/reviews/{id}',        [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

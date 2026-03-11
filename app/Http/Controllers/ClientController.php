@@ -9,6 +9,7 @@ use App\Models\BrandModel;
 use App\Models\CustomerModel;
 use App\Models\orderModel;
 use App\Models\orderItemModel;
+use App\Models\ReviewModel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -46,9 +47,11 @@ class ClientController extends Controller
     //     return view('Client.shopdetails', compact('product'));
     // }
 
-    public function show($id)
+public function show($id)
 {
     $product = ProductModel::findOrFail($id);
+
+    
 
     // எல்லா மற்ற products candidates
     $allOtherProducts = ProductModel::where('id', '!=', $id)
@@ -87,7 +90,11 @@ class ClientController extends Controller
             ->get();
     }
 
-    return view('Client.shopdetails', compact('product', 'featuredProducts'));
+    $reviews = ReviewModel::where('product_id', $id)
+                    ->where('status', 'approved')
+                    ->latest()->get();
+     return view('Client.shopdetails', compact('product', 'featuredProducts', 'reviews'));
+
 }
 
     public function showCategories(Request $request)
