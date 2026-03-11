@@ -15,9 +15,111 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
 
 class ClientController extends Controller
 {
+
+public function showForgotPassword()
+{
+    return view('Client.forgot_password');
+}
+
+public function sendResetLink(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email'
+    ]);
+
+    $customer = CustomerModel::where('email', $request->email)
+        ->where('status', 'active')
+        ->first();
+
+    // Always show success to prevent email enumeration
+    if (!$customer) {
+        return redirect()->back()->with('success', 'If this email exists, a reset link has been sent.');
+    }
+
+    // Delete any existing token for this email
+    DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+    $token = Str::random(64);
+
+    DB::table('password_reset_tokens')->insert([
+        'email'      => $request->email,
+        'token'      => Hash::make($token),
+        'created_at' => Carbon::now(),
+    ]);
+
+    $resetLink = route('client.reset', ['token' => $token, 'email' => $request->email]);
+
+    Mail::to($customer->email)->send(new ResetPasswordMail($customer, $resetLink));
+
+    return redirect()->back()->with('success', 'Password reset link sent to your email.');
+}
+
+public function showResetForm($token, Request $request)
+{
+    $email = $request->query('email');
+
+    // Verify token exists
+    $record = DB::table('password_reset_tokens')
+        ->where('email', $email)
+        ->first();
+
+    if (!$record || !Hash::check($token, $record->token)) {
+        return redirect()->route('client.forgot')->with('error', 'Invalid or expired reset link.');
+    }
+
+    // Check expiry (60 minutes)
+    if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+        DB::table('password_reset_tokens')->where('email', $email)->delete();
+        return redirect()->route('client.forgot')->with('error', 'Reset link has expired. Please request a new one.');
+    }
+
+    return view('Client.reset-password', compact('token', 'email'));
+}
+
+public function resetPassword(Request $request)
+{
+    $request->validate([
+        'token'                 => 'required',
+        'email'                 => 'required|email',
+        'password'              => 'required|confirmed|min:6',
+    ]);
+
+    $record = DB::table('password_reset_tokens')
+        ->where('email', $request->email)
+        ->first();
+
+    if (!$record || !Hash::check($request->token, $record->token)) {
+        return redirect()->back()->with('error', 'Invalid or expired reset link.');
+    }
+
+    if (Carbon::parse($record->created_at)->addMinutes(60)->isPast()) {
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        return redirect()->route('client.forgot')->with('error', 'Reset link has expired. Please request a new one.');
+    }
+
+    $customer = CustomerModel::where('email', $request->email)->first();
+
+    if (!$customer) {
+        return redirect()->back()->with('error', 'Account not found.');
+    }
+
+    $customer->password = Hash::make($request->password);
+    $customer->save();
+
+    // Clean up token
+    DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+    return redirect()->route('ClientLogin')->with('success', 'Password reset successful! Please login.');
+}
+
+
+
     public function index()
     {
         // $departments = MainCategoryModel::inRandomOrder()->take(6)->get();  
@@ -472,20 +574,18 @@ public function storeOld(Request $request)
         'postcode'   => 'required|string|max:20',
         'phone'      => 'required|string|max:20',
         'email'      => 'required|email|max:255',
-    ]);   
-
-    if($request->ship_different ?? 0)
-    {
-        $request->validate([       
-        'ship_different'=> 'nullable|boolean',
-        'ship_address1' => 'required_if:ship_different,1|string|max:255',
-        'ship_address2' => 'nullable|string|max:255',
-        'ship_city'     => 'required_if:ship_different,1|string|max:100',
-        'ship_country'  => 'required_if:ship_different,1|string|max:100',
-        'ship_zip'      => 'required_if:ship_different,1|string|max:20',
-        'ship_phone'    => 'required_if:ship_different,1|string|max:20',
     ]);
 
+    if($request->ship_different ?? 0) {
+        $request->validate([
+            'ship_different'=> 'nullable|boolean',
+            'ship_address1' => 'required_if:ship_different,1|string|max:255',
+            'ship_address2' => 'nullable|string|max:255',
+            'ship_city'     => 'required_if:ship_different,1|string|max:100',
+            'ship_country'  => 'required_if:ship_different,1|string|max:100',
+            'ship_zip'      => 'required_if:ship_different,1|string|max:20',
+            'ship_phone'    => 'required_if:ship_different,1|string|max:20',
+        ]);
     }
 
     $products = $request->products;
@@ -494,8 +594,7 @@ public function storeOld(Request $request)
         return back()->with('error', 'No products selected.');
     }
 
-
-     session([
+    session([
         'billing' => [
             'first_name' => $request->first_name,
             'last_name'  => $request->last_name,
@@ -521,111 +620,9 @@ public function storeOld(Request $request)
     DB::beginTransaction();
 
     try {
-
-        $totalPrice = 0;
-        $orderItems = [];
-
-        foreach ($products as $data) {
-
-            $product = ProductModel::lockForUpdate()->findOrFail($data['id']);
-            $quantity = $data['quantity'];
-
-            if ($product->quantity < $quantity) {
-                DB::rollBack();
-                return back()->with('error', "{$product->name} stock இல்லை.");
-            }
-
-            $originalPrice = $product->price;
-            $discount = 0;
-
-            if ($product->discount_type === 'rate') {
-                $discount = ($originalPrice * $product->discount_rate) / 100;
-            } elseif ($product->discount_type === 'amount') {
-                $discount = $product->discount_amount;
-            }
-
-            $discount = min($discount, $originalPrice);
-            $finalPrice = ($originalPrice - $discount) * $quantity;
-
-            $totalPrice += $finalPrice;
-
-            $orderItems[] = [
-                'product_id' => $product->id,
-                'quantity'   => $quantity,
-                'price'      => $originalPrice,
-                'total'      => $finalPrice,
-                'image_path' => $product->image ?? null,
-            ];
-
-            $product->quantity -= $quantity;
-            $product->save();
-        }
-
-        // Bill Number Generate
-        $lastOrder = OrderModel::orderBy('id','desc')->first();
-        $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
-        $billNo = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-
-        $order = OrderModel::create([
-            'customer_id'      => session('client_id'),
-            'bill_no' => $billNo,
-            'name' => $validated['first_name'].' '.$validated['last_name'],
-            'email' => $validated['email'],
-            'mobile_number' => $validated['phone'],
-            'billing_address1' => $validated['address1'],
-            'billing_city' => $validated['city'],
-            'billing_country' => $validated['country'],
-            'billing_postcode' => $validated['postcode'],
-            'status' => 'Pending',
-            'payment_status' => 'Pending',
-            'total' => $totalPrice,
-        ]);
-
-        foreach ($orderItems as $item) {
-            OrderItemModel::create(array_merge($item, [
-                'order_id' => $order->id
-            ]));
-        }
-
-        DB::commit();
-
-        return redirect()->route('order.status', ['order' => $order->id])
-            ->with('success', 'Order placed successfully!');
-
-    } catch (\Exception $e) {
-
-        DB::rollBack();
-        return back()->with('error', 'Something went wrong.');
-    }
-}
-
-public function storeSingle(Request $request)
-{
-    $billing = session('billing');
-
-    if (!$billing) {
-        return back()->with('error', 'Please fill in your billing details first.');
-    }
-
-    $request->validate([
-        'products'             => 'required|array|min:1',
-        'products.*.id'        => 'required|integer',
-        'products.*.quantity'  => 'required|integer|min:1',
-    ]);
-
-    $products = $request->products;
-
-    if (!$products || count($products) == 0) {
-        return back()->with('error', 'No products selected.');
-    }
-
-    $shipping = session('shipping');
-
-    DB::beginTransaction();
-
-    try {
-        $totalPrice = 0;
-        $orderItems = [];
+        $totalPrice  = 0;
+        $orderItems  = [];
+        $inventoryLogs = []; //  inventory log collect
 
         foreach ($products as $data) {
             $product  = ProductModel::lockForUpdate()->findOrFail($data['id']);
@@ -657,8 +654,137 @@ public function storeSingle(Request $request)
                 'image_path' => $product->image ?? null,
             ];
 
+            //  inventory log data collect
+            $before = $product->quantity;
             $product->quantity -= $quantity;
             $product->save();
+
+            $inventoryLogs[] = [
+                'product_id'      => $product->id,
+                'type'            => 'out',
+                'quantity'        => $quantity,
+                'quantity_before' => $before,
+                'quantity_after'  => $product->quantity,
+                'reason'          => 'Order',
+                'note'            => 'Auto - Order placed',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ];
+        }
+
+        // Bill Number Generate
+        $lastOrder  = OrderModel::orderBy('id', 'desc')->first();
+        $nextNumber = $lastOrder ? ((int) substr($lastOrder->bill_no, 2)) + 1 : 1;
+        $billNo     = 'TN' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        $order = OrderModel::create([
+            'customer_id'      => session('client_id'),
+            'bill_no'          => $billNo,
+            'name'             => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email'            => $validated['email'],
+            'mobile_number'    => $validated['phone'],
+            'billing_address1' => $validated['address1'],
+            'billing_city'     => $validated['city'],
+            'billing_country'  => $validated['country'],
+            'billing_postcode' => $validated['postcode'],
+            'status'           => 'Pending',
+            'payment_status'   => 'Pending',
+            'total'            => $totalPrice,
+        ]);
+
+        foreach ($orderItems as $item) {
+            OrderItemModel::create(array_merge($item, ['order_id' => $order->id]));
+        }
+
+        //  inventory logs save
+        \App\Models\InventoryLogModel::insert($inventoryLogs);
+
+        DB::commit();
+
+        return redirect()->route('order.status', ['order' => $order->id])
+            ->with('success', 'Order placed successfully!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong.');
+    }
+}
+
+public function storeSingle(Request $request)
+{
+    $billing = session('billing');
+
+    if (!$billing) {
+        return back()->with('error', 'Please fill in your billing details first.');
+    }
+
+    $request->validate([
+        'products'             => 'required|array|min:1',
+        'products.*.id'        => 'required|integer',
+        'products.*.quantity'  => 'required|integer|min:1',
+    ]);
+
+    $products = $request->products;
+
+    if (!$products || count($products) == 0) {
+        return back()->with('error', 'No products selected.');
+    }
+
+    $shipping = session('shipping');
+
+    DB::beginTransaction();
+
+    try {
+        $totalPrice    = 0;
+        $orderItems    = [];
+        $inventoryLogs = []; //  inventory log collect
+
+        foreach ($products as $data) {
+            $product  = ProductModel::lockForUpdate()->findOrFail($data['id']);
+            $quantity = $data['quantity'];
+
+            if ($product->quantity < $quantity) {
+                DB::rollBack();
+                return back()->with('error', "{$product->name} stock is empty.");
+            }
+
+            $originalPrice = $product->price;
+            $discount = 0;
+
+            if ($product->discount_type === 'rate') {
+                $discount = ($originalPrice * $product->discount_rate) / 100;
+            } elseif ($product->discount_type === 'amount') {
+                $discount = $product->discount_amount;
+            }
+
+            $discount   = min($discount, $originalPrice);
+            $finalPrice = ($originalPrice - $discount) * $quantity;
+            $totalPrice += $finalPrice;
+
+            $orderItems[] = [
+                'product_id' => $product->id,
+                'quantity'   => $quantity,
+                'price'      => $originalPrice,
+                'total'      => $finalPrice,
+                'image_path' => $product->image ?? null,
+            ];
+
+            //  inventory log data collect
+            $before = $product->quantity;
+            $product->quantity -= $quantity;
+            $product->save();
+
+            $inventoryLogs[] = [
+                'product_id'      => $product->id,
+                'type'            => 'out',
+                'quantity'        => $quantity,
+                'quantity_before' => $before,
+                'quantity_after'  => $product->quantity,
+                'reason'          => 'Order',
+                'note'            => 'Auto - Order placed',
+                'created_at'      => now(),
+                'updated_at'      => now(),
+            ];
         }
 
         $lastOrder  = OrderModel::orderBy('id', 'desc')->first();
@@ -667,24 +793,25 @@ public function storeSingle(Request $request)
 
         $order = OrderModel::create([
             'customer_id'      => session('client_id'),
-            'bill_no'           => $billNo,
-            'name'              => $billing['first_name'] . ' ' . $billing['last_name'],
-            'email'             => $billing['email'],
-            'mobile_number'     => $billing['phone'],
-            'billing_address1'  => $billing['address1'],
-            'billing_city'      => $billing['city'],
-            'billing_country'   => $billing['country'],
-            'billing_postcode'  => $billing['postcode'],
-            'status'            => 'Pending',
-            'payment_status'    => 'Pending',
-            'total'             => $totalPrice,
+            'bill_no'          => $billNo,
+            'name'             => $billing['first_name'] . ' ' . $billing['last_name'],
+            'email'            => $billing['email'],
+            'mobile_number'    => $billing['phone'],
+            'billing_address1' => $billing['address1'],
+            'billing_city'     => $billing['city'],
+            'billing_country'  => $billing['country'],
+            'billing_postcode' => $billing['postcode'],
+            'status'           => 'Pending',
+            'payment_status'   => 'Pending',
+            'total'            => $totalPrice,
         ]);
 
         foreach ($orderItems as $item) {
-            OrderItemModel::create(array_merge($item, [
-                'order_id' => $order->id
-            ]));
+            OrderItemModel::create(array_merge($item, ['order_id' => $order->id]));
         }
+
+        // inventory logs save
+        \App\Models\InventoryLogModel::insert($inventoryLogs);
 
         DB::commit();
 
@@ -779,6 +906,65 @@ public function account()
         ->get();
 
     return view('Client.account', compact('customer', 'orders'));
+}
+
+public function cancelOrder(Request $request, $id)
+{
+    $clientId = session('client_id');
+
+    if (!$clientId) {
+        return redirect()->route('ClientLogin');
+    }
+
+    $order = OrderModel::where('id', $id)
+        ->where('customer_id', $clientId)
+        ->first();
+
+    if (!$order) {
+        return back()->with('error', 'Order not found.');
+    }
+
+    if (!in_array($order->status, ['Pending', 'Processing'])) {
+        return back()->with('error', 'This order cannot be cancelled.');
+    }
+
+    DB::beginTransaction();
+
+    try {
+         
+        $items = OrderItemModel::where('order_id', $order->id)->get();
+
+        foreach ($items as $item) {
+            $product = ProductModel::lockForUpdate()->find($item->product_id);
+            if (!$product) continue;
+
+            $before = $product->quantity;
+            $product->quantity += $item->quantity;
+            $product->save();
+
+            // Inventory log
+            \App\Models\InventoryLogModel::create([
+                'product_id'      => $product->id,
+                'type'            => 'in',
+                'quantity'        => $item->quantity,
+                'quantity_before' => $before,
+                'quantity_after'  => $product->quantity,
+                'reason'          => 'Order Cancelled',
+                'note'            => 'Auto - Order #' . $order->bill_no . ' cancelled by customer',
+            ]);
+        }
+
+        $order->status = 'Cancelled';
+        $order->save();
+
+        DB::commit();
+
+        return back()->with('success', 'Order #' . $order->bill_no . ' cancelled successfully.');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Something went wrong.');
+    }
 }
 
 }

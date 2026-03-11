@@ -15,6 +15,8 @@ use App\Http\Controllers\RecommendationController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\InventoryController;
+
 
 
 
@@ -149,7 +151,7 @@ Route::get('/products/subcategory/{id}', [ClientController::class, 'productsBySu
     // Route::post('/client/login', [ClientController::class, 'login'])
     // ->name('client.login');
 
-    Route::post('/client/register', [ClientController::class, 'register'])
+Route::post('/client/register', [ClientController::class, 'register'])
     ->name('client.register');
 
 Route::post('/client/login', [ClientController::class, 'login'])
@@ -160,14 +162,14 @@ Route::post('/client/logout', [ClientController::class, 'logout'])->name('client
 // Route::get('/delivery-info/{product}', [ClientController::class, 'showDeliveryInfo'])
 //      ->name('delivery.info');
 
-     Route::get('/delivery-info/{id}', [ClientController::class, 'showDeliveryInfo'])
+Route::get('/delivery-info/{id}', [ClientController::class, 'showDeliveryInfo'])
     ->name('delivery.info');
 
 
-     Route::post('/single-order', [ClientController::class, 'storeSingle'])
+Route::post('/single-order', [ClientController::class, 'storeSingle'])
     ->name('order.single');
 
-   Route::post('/single-order-old', [ClientController::class, 'storeOld'])   
+Route::post('/single-order-old', [ClientController::class, 'storeOld'])   
     ->name('order.singleOld');
     
 Route::get('/delivery-info', [ClientController::class, 'showDeliveryInfo'])
@@ -208,9 +210,9 @@ Route::get('/recommendations/purchased',
 Route::get('/account', [ClientController::class, 'account'])
     ->name('client.account');
 
-    Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
+Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
 
-    Route::get('/forgot-password', [ClientController::class, 'showForgotPassword'])->name('client.forgot');
+Route::get('/forgot-password', [ClientController::class, 'showForgotPassword'])->name('client.forgot');
 Route::post('/forgot-password', [ClientController::class, 'sendResetLink'])->name('client.forgot.send');
 Route::get('/reset-password/{token}', [ClientController::class, 'showResetForm'])->name('client.reset');
 Route::post('/reset-password', [ClientController::class, 'resetPassword'])->name('client.reset.save');
@@ -219,6 +221,13 @@ Route::get('/admin/reviews',                [ReviewController::class, 'adminInde
 Route::post('/admin/reviews/{id}/approve',  [ReviewController::class, 'approve'])->name('admin.reviews.approve');
 Route::post('/admin/reviews/{id}/reject',   [ReviewController::class, 'reject'])->name('admin.reviews.reject');
 Route::delete('/admin/reviews/{id}',        [ReviewController::class, 'destroy'])->name('admin.reviews.destroy');
+
+Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+Route::post('/inventory/update', [InventoryController::class, 'update'])->name('inventory.update');
+
+Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+Route::post('/inventory/update', [InventoryController::class, 'update'])->name('inventory.update');
+Route::post('/order/{id}/cancel', [ClientController::class, 'cancelOrder'])->name('order.cancel');
 
 
 

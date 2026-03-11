@@ -32,6 +32,11 @@ class ProductModel extends Model
         return $this->belongsTo(SubCategoryModel::class);
     }
 
+    public function inventoryLogs()
+    {
+        return $this->hasMany(InventoryLogModel::class, 'product_id');
+    }
+
     public function brand() {
         return $this->belongsTo(BrandModel::class);
     }

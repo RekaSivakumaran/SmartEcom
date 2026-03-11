@@ -525,7 +525,7 @@
             tr.innerHTML = `
                 <td>
                     ${item.image_path 
-                        ? `<img src="/image/Products/${item.image_path}" alt="Product">`
+                        ? `<img src="/${item.image_path}" alt="Product">`
                         : 'No Image'}
                 </td>
                 <td>${item.product ? item.product.name : 'Deleted Product'}</td>
@@ -586,7 +586,7 @@
                     <td>${item.product?.name ?? 'Deleted Product'}</td>
                     <td>
                         ${item.image_path 
-                            ? `<img src="/image/Products/${item.image_path}" alt="Product">`
+                            ? `<img src="/${item.image_path}" alt="Product">`
                             : 'No Image'}
                     </td>
                     <td>${item.quantity}</td>

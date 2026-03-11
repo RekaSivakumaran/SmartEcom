@@ -4,8 +4,8 @@
 
 <style>
 #checkoutBtn:hover {
-    color: #ffffff;       /* text white on hover */
-    background-color: #0056b3; /* optional background darken */
+    color: #ffffff;       
+    background-color: #0056b3;  
     transition: all 0.3s ease;
 }
 </style>

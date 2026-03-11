@@ -450,6 +450,13 @@
             </li>
 
             <li>
+                <a href="{{ route('inventory.index') }}"
+                class="{{ request()->routeIs('inventory.index') ? 'active' : '' }}">
+                <i class="fa-solid fa-boxes-stacked icon"></i> Inventory
+                </a>
+            </li>
+
+            <li>
     <a href="{{ route('admin.reviews') }}"
        class="{{ request()->routeIs('admin.reviews') ? 'active' : '' }}">
         <i class="fa-solid fa-star icon"></i> Reviews

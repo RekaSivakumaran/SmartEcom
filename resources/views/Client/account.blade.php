@@ -266,19 +266,52 @@
                                         @endif
                                     </div>
 
-                                    {{-- Bottom: count + total --}}
-                                    <div class="order-bottom">
-                                        <span class="order-items-count">
-                                            <i class="fas fa-cube" style="margin-right:4px;"></i>
-                                            {{ $order->items->count() }} item(s)
-                                            <small style="color:#bbb;margin-left:6px;">
-                                                click to view details
-                                            </small>
-                                        </span>
-                                        <span class="order-total">
-                                            Rs.{{ number_format($order->total, 2) }}
-                                        </span>
-                                    </div>
+
+                                   @if(session('success'))
+    <div class="auto-alert"
+         style="background:#d4edda; color:#155724; padding:12px 16px;
+                border-radius:8px; margin-bottom:15px; border:1px solid #c3e6cb;">
+        ✅ {{ session('success') }}
+    </div>
+@endif
+@if(session('error'))
+    <div class="auto-alert"
+         style="background:#f8d7da; color:#721c24; padding:12px 16px;
+                border-radius:8px; margin-bottom:15px; border:1px solid #f5c6cb;">
+        ❌ {{ session('error') }}
+    </div>
+@endif
+
+                                    
+<div class="order-bottom">
+    <span class="order-items-count">
+        <i class="fas fa-cube" style="margin-right:4px;"></i>
+        {{ $order->items->count() }} item(s)
+        <small style="color:#bbb;margin-left:6px;">click to view details</small>
+    </span>
+    <div style="display:flex; align-items:center; gap:10px;">
+
+         
+        @if(in_array($order->status, ['Pending', 'Processing']))
+            <form method="POST"
+                  action="{{ route('order.cancel', $order->id) }}"
+                  onsubmit="return confirm('Cancel order {{ $order->bill_no }}?');"
+                  onclick="event.stopPropagation();">
+                @csrf
+                <button type="submit"
+                        style="background:#dc3545; color:#fff; border:none;
+                               padding:5px 14px; border-radius:20px; font-size:0.78em;
+                               font-weight:600; cursor:pointer;">
+                    Cancel Order
+                </button>
+            </form>
+        @endif
+
+        <span class="order-total">
+            Rs.{{ number_format($order->total, 2) }}
+        </span>
+    </div>
+</div>
                                 </div>
 
                                 {{-- ── Expander: Order Details ── --}}
@@ -359,6 +392,16 @@
 </div>
 
 <script>
+
+setTimeout(() => {
+    document.querySelectorAll('.auto-alert')
+        .forEach(el => {
+            el.style.transition = 'opacity 0.5s';
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 500);
+        });
+}, 2000);
+
 function toggleOrder(orderId) {
     const details = document.getElementById('order-details-' + orderId);
     const chevron = document.getElementById('chevron-' + orderId);
