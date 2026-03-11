@@ -210,7 +210,11 @@ Route::get('/account', [ClientController::class, 'account'])
 
     Route::post('/review/store', [ReviewController::class, 'store'])->name('review.store');
 
-// Admin — review management
+    Route::get('/forgot-password', [ClientController::class, 'showForgotPassword'])->name('client.forgot');
+Route::post('/forgot-password', [ClientController::class, 'sendResetLink'])->name('client.forgot.send');
+Route::get('/reset-password/{token}', [ClientController::class, 'showResetForm'])->name('client.reset');
+Route::post('/reset-password', [ClientController::class, 'resetPassword'])->name('client.reset.save');
+
 Route::get('/admin/reviews',                [ReviewController::class, 'adminIndex'])->name('admin.reviews');
 Route::post('/admin/reviews/{id}/approve',  [ReviewController::class, 'approve'])->name('admin.reviews.approve');
 Route::post('/admin/reviews/{id}/reject',   [ReviewController::class, 'reject'])->name('admin.reviews.reject');
