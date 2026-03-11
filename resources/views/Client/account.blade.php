@@ -70,11 +70,9 @@
 .order-total { font-weight:700; color:#d33b33; font-size:1em; }
 .order-items-count { color:#888; font-size:0.8em; }
 
-/* Chevron */
 .chevron-icon { transition:transform 0.3s ease; color:#aaa; font-size:0.8em; margin-left:6px; }
 .chevron-icon.open { transform:rotate(180deg); }
 
-/* Expander */
 .order-expander {
     display:none;
     border-top:2px dashed #f0f0f0;
@@ -87,12 +85,10 @@
     to   { opacity:1; transform:translateY(0); }
 }
 
-/* Address Box */
 .address-box { background:#fff; border:1px solid #f0f0f0; border-radius:10px; padding:12px 16px; margin-bottom:16px; }
 .address-box .address-label { font-weight:600; color:#555; font-size:0.83em; margin-bottom:4px; }
 .address-box .address-text { color:#777; font-size:0.85em; margin:0; }
 
-/* Items Table */
 .items-table { width:100%; border-collapse:collapse; font-size:0.87em; }
 .items-table thead tr { background:#f5f5f5; }
 .items-table th { padding:9px 12px; color:#555; font-weight:600; text-align:left; }
@@ -107,7 +103,6 @@
 .product-cell { display:flex; align-items:center; gap:10px; }
 .product-cell img { width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid #eee; }
 
-/* Empty state */
 .empty-state { text-align:center; padding:50px 20px; }
 .empty-state i { font-size:3.5em; color:#ddd; margin-bottom:15px; display:block; }
 .empty-state p { color:#aaa; margin-bottom:20px; }

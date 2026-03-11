@@ -53,7 +53,6 @@ public function show($id)
 
     
 
-    // எல்லா மற்ற products candidates
     $allOtherProducts = ProductModel::where('id', '!=', $id)
         ->where('status', 'Active')
         ->get();
@@ -333,10 +332,8 @@ if ($productId) {
       $billing = session('billing');
 
     if ($billing == null) {
-        // Billing session இல்லை → First time page
         return view('client.DeliveryInfo', compact('products'));
     } else {
-        // Billing session உள்ளது → Summary page
         return view('client.DeliveryInfo2', compact('products'));
     }
 

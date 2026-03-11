@@ -239,10 +239,10 @@ class RecommendationController extends Controller
         }
     }
 
-    // ─────────────────────────────────────────────────────────
+    
     // Health check
     // Route: GET /recommendations/health
-    // ─────────────────────────────────────────────────────────
+     
     public function healthCheck()
     {
         try {

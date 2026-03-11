@@ -15,22 +15,22 @@ class AdminDashboardController extends Controller
 {
    public function dashboard()
     {
-        // ================= TOTAL SALES =================
+       
         //$totalSales = orderModel::sum('total') ?? 0;
         $totalSales = orderModel::where('status','completed')
                         ->sum('total');
 
 
-        // ================= TOTAL ORDERS =================
+        
         $totalOrders = orderModel::count() ?? 0;
 
-        // ================= TOTAL CUSTOMERS =================
+        
         $totalCustomers = CustomerModel::count()?? 0;
 
-        // ================= TOTAL REVENUE =================
+      
         $totalRevenue = orderModel::sum('total') ?? 0;
 
-        $monthlyTarget = 200; // set your target
+        $monthlyTarget = 200; 
         $thisMonthSales = orderModel::whereMonth('created_at', Carbon::now()->month)
                             ->sum('total');
 
@@ -38,9 +38,7 @@ class AdminDashboardController extends Controller
             ? ($thisMonthSales / $monthlyTarget) * 100 
             : 0;
 
-        // ===============================
-        // TOP PERFORMING CATEGORIES
-        // ===============================
+       
         $topCategories = DB::table('order_items')
             ->join('products','order_items.product_id','=','products.id')
             ->join('main_categories','products.main_category_id','=','main_categories.id')
@@ -51,9 +49,7 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // ===============================
-        // RECENT ORDERS ACTIVITY
-        // ===============================
+        
         $recentOrders = orderModel::latest()
                             ->limit(5)
                             ->get();
@@ -69,13 +65,12 @@ class AdminDashboardController extends Controller
         DB::raw('DATE(created_at) as date'),
         DB::raw('SUM(total) as total_sales')
     )
-    ->where('status', 'completed') // only completed orders
+    ->where('status', 'completed') 
     ->where('created_at', '>=', now()->subDays(7))
     ->groupBy('date')
     ->orderBy('date')
     ->get();
 
-    // Convert to arrays for chart
     $dates = $salesAnalytics->pluck('date');
     $totals = $salesAnalytics->pluck('total_sales');
 
